@@ -1619,6 +1619,7 @@ img {
 .menu-grid-item {
   line-height: 1.2;
   margin-bottom: 1.5rem;
+  top:50%;
 }
 
 .menu-grid-item .text-center{
