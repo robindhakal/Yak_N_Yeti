@@ -458,8 +458,8 @@ var Core = {
 
             if($googleMap1.length) {
 
-                var yourLatitude1 = 30.503014,
-                    yourLongitude1 = -97.820616,
+                var yourLatitude1 = 30.502935,
+                    yourLongitude1 = -97.820623,
                     yourLatLng1 = new google.maps.LatLng(yourLatitude1,yourLongitude1);
                 
                 map1 = new google.maps.Map(document.getElementById('google-map-1'), mapOptions);
