@@ -46,6 +46,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 <!-- Body Wrapper -->
 <div id="body-wrapper" class="animsition">
+    
+    <div class="alert alert-success" id="alert-desktop"role="alert">
+        <strong>$5 OFF!!!</strong>
+        Order Pickup or Delivery from our website and get $5 off your order. Offer valid 03/07 - 03/13.
+    </div>
 
         <!-- Header -->
         <header id="header" class="light">
@@ -105,7 +110,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                             </ul>
                         </nav>
                         <div class="module left">
-                            <div data-toggle="modal" data-target="#onlineOrderModel" class="btn btn-outline-primary"><span>Order</span></div>
+                            <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="window.open('https://order.online/business/yak-n-yeti-342916')"><span>Order Online</span></button>
+                            <!-- <div data-toggle="modal" data-target="#onlineOrderModel" class="btn btn-outline-primary"><span>Order</span></div> -->
                         </div>
                     </div>
                     <div class="col-md-2">
@@ -141,7 +147,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 <span class="notification">2</span>
             </a> -->
             <div class="module module-cart">
-                <div data-toggle="modal" data-target="#onlineOrderModel" class="btn btn-outline-primary"><span>Order</span></div>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="window.open('https://order.online/business/yak-n-yeti-342916')"><span>Order Online</span></button>
+                <!-- <div data-toggle="modal" data-target="#onlineOrderModel" class="btn btn-outline-primary"><span>Order</span></div> -->
             </div>
     
         </header>
@@ -149,6 +156,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
     <!-- Content -->
     <div id="content">
+        
+        <div class="alert alert-success" id="alert-mobile" role="alert">
+            <strong>$5 OFF!!!</strong>
+            Order Pickup or Delivery from our website and get $5 off your order. Offer valid 03/07 - 03/13.
+        </div>
 
         <!-- Section - Main -->
         <section class="section section-main section-main-1 bg-light">
@@ -174,12 +186,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                             <div class="content-inner">
                                 <h1>Nepalese<br>Khana Set</h1>
                                 <h5 class="text-muted mb-5">Staple food of Nepal.</h5>
-                                <a href="menu.html" class="btn btn-outline-primary btn-lg"><span>View Menu</span></a>
+                                <a onclick="window.open('https://order.online/business/yak-n-yeti-342916')" class="btn btn-outline-primary btn-lg"><span>Order Online</span></a>
                             </div>
                             <div class="content-inner">
                                 <h1>Sadheko Momo</h1>
                                 <h5 class="text-muted mb-5">Momo is Nepal's most popular food.</h5>
-                                <a href="menu.html" class="btn btn-outline-primary btn-lg"><span>View Menu</span></a>
+                                <a onclick="window.open('https://order.online/business/yak-n-yeti-342916')" class="btn btn-outline-primary btn-lg"><span>Order Online</span></a>
                             </div>
                         </div>
                         <nav class="content-nav" >
@@ -522,8 +534,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     </div>
     <!-- Content / End -->
 
+
     <!-- Modal Online Order-->
-    <div class="modal fade" id="onlineOrderModel" tabindex="-1" role="dialog"
+    <!-- <div class="modal fade" id="onlineOrderModel" tabindex="-1" role="dialog"
     aria-labelledby="onlineOrderModelTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
@@ -533,14 +546,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
                         <button type="button" class="btn btn-primary btn-block" data-dismiss="modal" onclick="window.open('https://www.clover.com/online-ordering/yak-n-yeti-cedar-park')"><span>Curbside Pickup</span></button>
 
-                        <button type="button"
-                            class="btn btn-outline-primary btn-block" data-dismiss="modal" onclick="window.open('https://order.online/store/yak-n-yeti-752723/en-US/?delivery=true')"><span>Home Delivery</span></button>
+                        <button type="button" class="btn btn-outline-primary btn-block" data-dismiss="modal" onclick="window.open('https://order.online/store/yak-n-yeti-752723/en-US/?delivery=true')"><span>Home Delivery</span></button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
     <!-- Modal Online Order-->
      <!-- Modal Delivery Options -->
     <!-- <div class="modal fade" id="deliveryModalCenter" tabindex="-1" role="dialog"

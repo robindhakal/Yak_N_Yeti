@@ -47,7 +47,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <!-- Body Wrapper -->
 <div id="body-wrapper" class="animsition">
 
-    
+    <div class="alert alert-success" id="alert-desktop"role="alert">
+        <strong>$5 OFF!!!</strong>
+        Order Pickup or Delivery from our website and get $5 off your order. Offer valid 03/07 - 03/13.
+    </div>
+
     <!-- Header -->
     <header id="header" class="light">
         <div class="container">
@@ -106,7 +110,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                         </ul>
                     </nav>
                     <div class="module left">
-                        <div data-toggle="modal" data-target="#onlineOrderModel" class="btn btn-outline-primary"><span>Order</span></div>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="window.open('https://order.online/business/yak-n-yeti-342916')"><span>Order Online</span></button>
+                        <!-- <div data-toggle="modal" data-target="#onlineOrderModel" class="btn btn-outline-primary"><span>Order</span></div> -->
                     </div>
                 </div>
                 <div class="col-md-2">
@@ -142,7 +147,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <span class="notification">2</span>
         </a> -->
         <div class="module module-cart">
-            <div data-toggle="modal" data-target="#onlineOrderModel" class="btn btn-outline-primary"><span>Order</span></div>
+            <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="window.open('https://order.online/business/yak-n-yeti-342916')"><span>Order Online</span></button>
+            <!-- <div data-toggle="modal" data-target="#onlineOrderModel" class="btn btn-outline-primary"><span>Order</span></div> -->
         </div>
 
     </header>
@@ -150,6 +156,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
     <!-- Content -->
     <div id="content">
+
+        <div class="alert alert-success" id="alert-mobile" role="alert">
+            <strong>$5 OFF!!!</strong>
+            Order Pickup or Delivery from our website and get $5 off your order. Offer valid 03/07 - 03/13.
+        </div>
 
         <!-- Page Title -->
         <div class="page-title bg-light">
