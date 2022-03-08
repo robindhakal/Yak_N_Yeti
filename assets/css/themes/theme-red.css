@@ -2568,6 +2568,8 @@ section.protrude, .section.protrude {
   border-radius: 0;
 }
 
+
+
 .alert-primary {
   background-color: #faeeee;
 }
@@ -2686,6 +2688,24 @@ section.protrude, .section.protrude {
   background-color: #282b2e;
   color: #fff;
 }
+
+/* Alert mobile
+---------------------------------------------------------*/
+
+#alert-mobile{
+  display: none;
+}
+
+@media only screen and (max-width: 991px) {
+  #alert-mobile {
+    display: block;
+  }
+  #alert-desktop {
+    display: none;
+  }
+}
+
+
 
 /* 6.2 Backgrounds
 ----------------------------------------------------------*/
