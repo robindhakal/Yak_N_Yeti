@@ -514,6 +514,7 @@ img {
 /* ----------------------------------------------------------------------------- */
 #header {
   position: relative;
+  top: 40px;
   width: 100%;
   background-color: #fff;
   z-index: 900;
@@ -2694,6 +2695,15 @@ section.protrude, .section.protrude {
 
 #alert-mobile{
   display: none;
+}
+
+#alert-desktop{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 40px;
+  z-index: 901; /* 901 is more then 900 of the header */
 }
 
 @media only screen and (max-width: 991px) {
@@ -5686,6 +5696,10 @@ h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
   margin-top: 0;
   margin-bottom: 2rem;
   font-weight: 200;
+}
+
+.no-bottom-margin{
+  margin-bottom: 0;
 }
 
 h1, .h1 {
