@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Yak N Yeti — Merchant Dashboard</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  :root{
+    --red:#C0392B;--red-dark:#A93226;--orange:#E67E22;
+    --bg:#f5f5f5;--white:#ffffff;--surface:#fafafa;
+    --border:#e0e0e0;--text:#1a1a1a;--muted:#666;--light:#999;
+    --green:#27ae60;--green-bg:#e8f8f0;--green-text:#1a6b40;
+    --warn-bg:#fff8e1;--warn-text:#b45309;
+    --info-bg:#e8f0fe;--info-text:#1a56db;
+    --danger-bg:#fef2f2;--danger-text:#991b1b;
+  }
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;}
+
+  /* ── LOGIN ── */
+  #loginPage{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a0a08 0%,#C0392B 100%);padding:20px;}
+  .login-card{background:var(--white);border-radius:16px;padding:40px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
+  .login-logo{text-align:center;margin-bottom:28px;}
+  .logo-circle{width:72px;height:72px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;border:3px solid var(--orange);}
+  .logo-circle span{color:#fff;font-size:28px;font-weight:700;}
+  .login-logo h2{font-size:22px;font-weight:700;color:var(--text);}
+  .login-logo p{font-size:13px;color:var(--muted);margin-top:4px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+  .field input,.field select,.field textarea{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;color:var(--text);background:var(--white);transition:border .2s;}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--red);}
+  .field textarea{resize:vertical;min-height:70px;}
+  .login-btn{width:100%;padding:13px;background:var(--red);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;margin-top:4px;transition:background .2s;}
+  .login-btn:hover{background:var(--red-dark);}
+  .login-hint{font-size:12px;color:var(--light);text-align:center;margin-top:14px;}
+  .login-error{color:var(--red);font-size:13px;text-align:center;margin-top:8px;display:none;}
+
+  /* ── APP SHELL ── */
+  #appPage{display:none;min-height:100vh;flex-direction:column;}
+  .topbar{background:var(--red);padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+  .topbar-left{display:flex;align-items:center;gap:12px;}
+  .topbar-logo{width:34px;height:34px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;}
+  .topbar h1{color:#fff;font-size:16px;font-weight:700;}
+  .topbar-badge{background:rgba(255,255,255,.18);color:#fff;font-size:11px;padding:3px 10px;border-radius:20px;}
+  .topbar-right{display:flex;align-items:center;gap:10px;}
+  .live-dot{width:8px;height:8px;background:#2ecc71;border-radius:50%;animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+  .topbar-right span{color:rgba(255,255,255,.85);font-size:12px;}
+  .logout-btn{background:rgba(255,255,255,.15);color:#fff;border:none;padding:6px 14px;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600;}
+  .logout-btn:hover{background:rgba(255,255,255,.25);}
+  .hamburger{display:none;background:none;border:none;color:#fff;font-size:22px;cursor:pointer;}
+
+  /* ── LAYOUT ── */
+  .layout{display:flex;flex:1;}
+  .sidebar{width:220px;background:var(--white);border-right:1px solid var(--border);padding:12px 0;position:sticky;top:52px;height:calc(100vh - 52px);overflow-y:auto;flex-shrink:0;transition:transform .3s;}
+  .nav-section{margin-bottom:4px;}
+  .nav-label{font-size:10px;font-weight:700;color:var(--light);text-transform:uppercase;letter-spacing:1px;padding:10px 18px 4px;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 18px;cursor:pointer;font-size:13px;color:var(--muted);border-left:3px solid transparent;transition:all .15s;user-select:none;}
+  .nav-item:hover{background:#fef7f6;color:var(--text);}
+  .nav-item.active{background:#fef7f6;color:var(--red);border-left-color:var(--red);font-weight:600;}
+  .nav-icon{font-size:15px;width:20px;text-align:center;}
+  .main{flex:1;padding:20px;overflow-y:auto;max-width:1200px;}
+
+  /* ── PAGES ── */
+  .page{display:none;}
+  .page.active{display:block;}
+  .page-header{margin-bottom:20px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+  .page-header-text h2{font-size:20px;font-weight:700;}
+  .page-header-text p{font-size:13px;color:var(--muted);margin-top:3px;}
+
+  /* ── CARDS ── */
+  .card{background:var(--white);border:1px solid var(--border);border-radius:12px;margin-bottom:16px;overflow:hidden;}
+  .card-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+  .card-header h3{font-size:14px;font-weight:700;}
+  .card-body{padding:18px;}
+  .card-body-flush{padding:0;}
+
+  /* ── STATS ── */
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px;}
+  .stat-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:14px;}
+  .stat-label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.3px;margin-bottom:6px;}
+  .stat-value{font-size:26px;font-weight:700;line-height:1;}
+  .stat-sub{font-size:11px;color:var(--light);margin-top:5px;}
+  .c-green{color:var(--green);}
+  .c-red{color:var(--red);}
+  .c-orange{color:var(--orange);}
+
+  /* ── BUTTONS ── */
+  .btn{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:6px;transition:all .15s;white-space:nowrap;}
+  .btn-primary{background:var(--red);color:#fff;}
+  .btn-primary:hover{background:var(--red-dark);}
+  .btn-secondary{background:var(--surface);color:var(--text);border:1px solid var(--border);}
+  .btn-secondary:hover{background:#efefef;}
+  .btn-success{background:var(--green);color:#fff;}
+  .btn-success:hover{background:#219150;}
+  .btn-danger{background:transparent;color:var(--red);border:1px solid var(--red);}
+  .btn-danger:hover{background:var(--danger-bg);}
+  .btn-sm{padding:5px 10px;font-size:12px;}
+  .btn-xs{padding:3px 8px;font-size:11px;}
+
+  /* ── ALERTS ── */
+  .alert{padding:12px 16px;border-radius:8px;font-size:13px;margin-bottom:14px;line-height:1.6;}
+  .alert-warning{background:var(--warn-bg);color:var(--warn-text);border:1px solid #fcd34d;}
+  .alert-success{background:var(--green-bg);color:var(--green-text);border:1px solid #86efac;}
+  .alert-info{background:var(--info-bg);color:var(--info-text);border:1px solid #93c5fd;}
+  .alert-danger{background:var(--danger-bg);color:var(--danger-text);border:1px solid #fca5a5;}
+
+  /* ── TABLE ── */
+  .table-wrap{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;}
+  th{text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;padding:10px 14px;border-bottom:1px solid var(--border);white-space:nowrap;}
+  td{padding:12px 14px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle;}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:#fef7f6;}
+
+  /* ── BADGES ── */
+  .badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;}
+  .badge-green{background:var(--green-bg);color:var(--green-text);}
+  .badge-red{background:var(--danger-bg);color:var(--danger-text);}
+  .badge-orange{background:#fff7ed;color:#9a3412;}
+  .badge-gray{background:#f3f4f6;color:#374151;}
+  .badge-blue{background:var(--info-bg);color:var(--info-text);}
+
+  /* ── TOGGLE ── */
+  .toggle{position:relative;display:inline-block;width:40px;height:22px;flex-shrink:0;}
+  .toggle input{opacity:0;width:0;height:0;}
+  .toggle-slider{position:absolute;inset:0;background:#d1d5db;border-radius:22px;cursor:pointer;transition:.3s;}
+  .toggle-slider:before{content:'';position:absolute;width:16px;height:16px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s;}
+  .toggle input:checked+.toggle-slider{background:var(--green);}
+  .toggle input:checked+.toggle-slider:before{transform:translateX(18px);}
+
+  /* ── MODAL ── */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center;padding:16px;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:var(--white);border-radius:16px;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);}
+  .modal-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--white);z-index:1;}
+  .modal-header h3{font-size:16px;font-weight:700;}
+  .modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1;padding:2px 6px;border-radius:4px;}
+  .modal-close:hover{background:var(--bg);}
+  .modal-body{padding:22px;}
+  .modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;position:sticky;bottom:0;background:var(--white);}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+  /* ── PROMO CARD ── */
+  .promo-card{border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;transition:border .2s;}
+  .promo-card.danger{border-color:var(--red);background:var(--danger-bg);}
+  .promo-card.inactive{opacity:.55;}
+  .promo-info h4{font-size:14px;font-weight:700;margin-bottom:4px;}
+  .promo-info p{font-size:12px;color:var(--muted);line-height:1.5;}
+  .promo-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+
+  /* ── ORDER LINK BOX ── */
+  .link-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;}
+  .link-url{font-size:13px;color:var(--info-text);word-break:break-all;}
+  .copy-btn{background:var(--red);color:#fff;border:none;padding:7px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+  .copy-btn:hover{background:var(--red-dark);}
+
+  /* ── HOURS ── */
+  .hours-row{display:grid;grid-template-columns:90px 50px 1fr;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);}
+  .hours-row:last-child{border-bottom:none;}
+  .hours-inputs{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+  .hours-inputs input{width:82px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;color:var(--text);}
+  .hours-sep{font-size:12px;color:var(--light);}
+
+  /* ── TOAST ── */
+  .toast{position:fixed;bottom:24px;right:24px;background:#1a1a1a;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;z-index:999;transform:translateY(20px);opacity:0;transition:all .3s;pointer-events:none;}
+  .toast.show{transform:translateY(0);opacity:1;}
+
+  /* ── CAT TABS ── */
+  .cat-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+  .cat-tab{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid var(--border);background:var(--white);cursor:pointer;color:var(--muted);transition:all .15s;}
+  .cat-tab.active{background:var(--red);color:#fff;border-color:var(--red);}
+
+  /* ── REAL DATA NOTICE ── */
+  .data-notice{background:#fff8e1;border:1px solid #fcd34d;border-radius:10px;padding:16px;margin-bottom:16px;}
+  .data-notice h4{font-size:13px;font-weight:700;color:#92400e;margin-bottom:6px;}
+  .data-notice p{font-size:12px;color:#92400e;line-height:1.6;}
+  .data-notice a{color:var(--red);font-weight:700;}
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:768px){
+    .hamburger{display:block;}
+    .sidebar{position:fixed;top:52px;left:0;height:calc(100vh - 52px);z-index:100;transform:translateX(-100%);}
+    .sidebar.open{transform:translateX(0);}
+    .sidebar-overlay{display:none;position:fixed;inset:0;top:52px;background:rgba(0,0,0,.3);z-index:99;}
+    .sidebar-overlay.open{display:block;}
+    .main{padding:14px;}
+    .stats-grid{grid-template-columns:1fr 1fr;}
+    .form-row{grid-template-columns:1fr;}
+    .topbar-badge{display:none;}
+    .page-header{flex-direction:column;}
+    .hours-row{grid-template-columns:80px 44px 1fr;}
+    table{font-size:12px;}
+    th,td{padding:8px 10px;}
+  }
+  @media(max-width:480px){
+    .stats-grid{grid-template-columns:1fr 1fr;}
+    .stat-value{font-size:20px;}
+    .modal{border-radius:12px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ LOGIN ═══════════════ -->
+<div id="loginPage">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-circle"><span>Y</span></div>
+      <h2>Yak N Yeti</h2>
+      <p>Merchant Dashboard — Admin Only</p>
+    </div>
+    <div class="field">
+      <label>Username</label>
+      <input type="text" id="loginUser" placeholder="admin" autocomplete="username" />
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password" />
+    </div>
+    <button class="login-btn" onclick="doLogin()">Sign In →</button>
+    <p class="login-error" id="loginError">❌ Incorrect username or password</p>
+    <p class="login-hint">Default login: <strong>admin</strong> / <strong>yaknyeti2024</strong><br>Change this immediately in Settings after first login.</p>
+  </div>
+</div>
+
+<!-- ═══════════════ APP ═══════════════ -->
+<div id="appPage" style="display:none;flex-direction:column;">
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="hamburger" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-logo">Y</div>
+      <h1>Yak N Yeti</h1>
+      <span class="topbar-badge">Merchant Dashboard</span>
+    </div>
+    <div class="topbar-right">
+      <div class="live-dot"></div>
+      <span>Live</span>
+      <button class="logout-btn" onclick="doLogout()">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+  <div class="layout">
+    <div class="sidebar" id="sidebar">
+      <div class="nav-section">
+        <div class="nav-label">Overview</div>
+        <div class="nav-item active" onclick="showPage('dashboard',this)"><span class="nav-icon">📊</span> Dashboard</div>
+        <div class="nav-item" onclick="showPage('orders',this)"><span class="nav-icon">📦</span> Orders</div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Menu</div>
+        <div class="nav-item" onclick="showPage('menu',this)"><span class="nav-icon">🍽️</span> Menu Items</div>
+        <div class="nav-item" onclick="showPage('categories',this)"><span class="nav-icon">📂</span> Categories</div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Marketing</div>
+        <div class="nav-item" onclick="showPage('promotions',this)"><span class="nav-icon">🎉</span> Promotions</div>
+        <div class="nav-item" onclick="showPage('ordering',this)"><span class="nav-icon">🔗</span> Order Links</div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Settings</div>
+        <div class="nav-item" onclick="showPage('hours',this)"><span class="nav-icon">🕐</span> Business Hours</div>
+        <div class="nav-item" onclick="showPage('settings',this)"><span class="nav-icon">⚙️</span> Settings</div>
+      </div>
+    </div>
+
+    <div class="main">
+
+      <!-- ── DASHBOARD ── -->
+      <div class="page active" id="page-dashboard">
+        <div class="page-header">
+          <div class="page-header-text"><h2>Dashboard 👋</h2><p>Welcome back — here's your restaurant overview</p></div>
+        </div>
+        <div class="alert alert-danger">🚨 <strong>Action Needed:</strong> DoorDash promotions are active and costing you 30–50% per order. Log into <strong>merchant.doordash.com</strong> and turn ALL promotions off today. <a href="#" onclick="showPage('promotions',document.querySelectorAll('.nav-item')[6])" style="color:var(--red);font-weight:700;">View Promotions →</a></div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-label">Menu Items</div><div class="stat-value" id="statMenuCount">0</div><div class="stat-sub">Across all categories</div></div>
+          <div class="stat-card"><div class="stat-label">Active Promos</div><div class="stat-value c-orange" id="statPromoCount">0</div><div class="stat-sub">Discount codes live</div></div>
+          <div class="stat-card"><div class="stat-label">Direct Orders</div><div class="stat-value c-green">Goal: 80%</div><div class="stat-sub">Connect Clover for real data</div></div>
+          <div class="stat-card"><div class="stat-label">Est. Daily Saving</div><div class="stat-value c-green">$252</div><div class="stat-sub">vs current DoorDash setup</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>💰 Revenue Reality Check</h3></div>
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+              <div style="background:var(--green-bg);border-radius:10px;padding:16px;">
+                <div style="font-size:11px;font-weight:700;color:var(--green-text);margin-bottom:4px;">CLOVER DIRECT — On $50 order</div>
+                <div style="font-size:28px;font-weight:700;color:var(--green-text);">$48.15</div>
+                <div style="font-size:12px;color:var(--green-text);margin-top:4px;">You keep 96% (only 3.5% + $0.10 fee)</div>
+              </div>
+              <div style="background:var(--danger-bg);border-radius:10px;padding:16px;">
+                <div style="font-size:11px;font-weight:700;color:var(--danger-text);margin-bottom:4px;">DOORDASH WITH PROMOS — On $50 order</div>
+                <div style="font-size:28px;font-weight:700;color:var(--danger-text);">$23–28</div>
+                <div style="font-size:12px;color:var(--danger-text);margin-top:4px;">You keep only 46–56% 😢</div>
+              </div>
+            </div>
+            <div style="background:var(--warn-bg);border-radius:8px;padding:12px;font-size:13px;color:var(--warn-text);">
+              💡 <strong>If 80% of your daily $1,000 came through Clover direct:</strong> You'd keep ~$930/day vs ~$628/day now. That's an extra <strong>$302/day = $9,060/month</strong>.
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>⚡ Quick Actions</h3></div>
+          <div class="card-body" style="display:flex;flex-wrap:wrap;gap:8px;">
+            <button class="btn btn-primary" onclick="openAddItem()">+ Add Menu Item</button>
+            <button class="btn btn-secondary" onclick="openAddPromo()">+ Add Promotion</button>
+            <button class="btn btn-secondary" onclick="showPage('ordering',document.querySelectorAll('.nav-item')[7])">🔗 Copy Order Link</button>
+            <button class="btn btn-secondary" onclick="showPage('hours',document.querySelectorAll('.nav-item')[8])">🕐 Update Hours</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ORDERS ── -->
+      <div class="page" id="page-orders">
+        <div class="page-header">
+          <div class="page-header-text"><h2>Orders</h2><p>Real-time orders from all platforms</p></div>
+        </div>
+        <div class="data-notice">
+          <h4>⚠️ How to get REAL live orders here</h4>
+          <p>
+            This dashboard currently shows <strong>sample demo data</strong>. To see real orders you need to connect your accounts:<br><br>
+            <strong>Option 1 — Clover:</strong> Log into <a href="https://dashboard.clover.com" target="_blank">dashboard.clover.com</a> → Orders section shows all real orders live.<br>
+            <strong>Option 2 — DoorDash:</strong> Log into <a href="https://merchant.doordash.com" target="_blank">merchant.doordash.com</a> → Orders tab for real data.<br>
+            <strong>Option 3 — Full integration:</strong> Hire a developer to connect the Clover API to this dashboard (~$500–1500 one-time cost).<br><br>
+            <strong>For now:</strong> Use this to manage your menu, promotions, hours and links. Use Clover and DoorDash dashboards for real order tracking.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h3>Recent Orders (Sample Data)</h3>
+            <span class="badge badge-orange">Demo — not real</span>
+          </div>
+          <div class="card-body-flush">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>#</th><th>Items</th><th>Total</th><th>Platform</th><th>Time</th><th>You Keep</th><th>Status</th></tr></thead>
+                <tbody id="ordersBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── MENU ITEMS ── -->
+      <div class="page" id="page-menu">
+        <div class="page-header">
+          <div class="page-header-text"><h2>Menu Items</h2><p>Edit prices, descriptions, and availability</p></div>
+          <button class="btn btn-primary" onclick="openAddItem()">+ Add Item</button>
+        </div>
+        <div class="alert alert-info">💡 <strong>Tip:</strong> Set your App Price 15% higher than your Website Price. Customers who order direct automatically get the better deal — no coupon needed.</div>
+        <div class="cat-tabs" id="catTabs"></div>
+        <div class="card">
+          <div class="card-body-flush">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Item</th><th>Category</th><th>Website $</th><th>App $ (+15%)</th><th>On Promo?</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody id="menuBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── CATEGORIES ── */
+      <div class="page" id="page-categories">
+        <div class="page-header">
+          <div class="page-header-text"><h2>Categories</h2><p>Your menu categories and item counts</p></div>
+          <button class="btn btn-secondary" onclick="openModal('addCatModal')">+ Add Category</button>
+        </div>
+        <div class="card">
+          <div class="card-body" id="catListBody"></div>
+        </div>
+      </div>
+
+      <!-- ── PROMOTIONS ── -->
+      <div class="page" id="page-promotions">
+        <div class="page-header">
+          <div class="page-header-text"><h2>Promotions</h2><p>Manage discount codes — for all items or individual items</p></div>
+          <button class="btn btn-primary" onclick="openAddPromo()">+ Add Promotion</button>
+        </div>
+        <div class="alert alert-danger">🚨 <strong>DoorDash promotions are costing you money.</strong> This dashboard manages YOUR direct order promotions. Separately, log into merchant.doordash.com and remove all DoorDash promotions immediately.</div>
+
+        <div class="card">
+          <div class="card-header"><h3>How Promotions Work</h3></div>
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div style="background:#f0fdf4;border-radius:8px;padding:14px;border:1px solid #bbf7d0;">
+                <div style="font-weight:700;font-size:13px;color:var(--green-text);margin-bottom:6px;">✅ Overall Promotion</div>
+                <div style="font-size:12px;color:var(--green-text);line-height:1.6;">Applies 15% off to <strong>everything</strong> in the cart. Customer enters code WEB15 at checkout. Best for driving all direct orders.</div>
+              </div>
+              <div style="background:#eff6ff;border-radius:8px;padding:14px;border:1px solid #bfdbfe;">
+                <div style="font-weight:700;font-size:13px;color:var(--info-text);margin-bottom:6px;">🎯 Individual Item Promo</div>
+                <div style="font-size:12px;color:var(--info-text);line-height:1.6;">Applies discount to <strong>specific items</strong> only. E.g. "20% off Momos this weekend." Great for slow days or promoting a dish.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="promoListEl"></div>
+      </div>
+
+      <!-- ── ORDER LINKS ── -->
+      <div class="page" id="page-ordering">
+        <div class="page-header"><div class="page-header-text"><h2>Order Links</h2><p>Share these links everywhere — each direct order saves you ~$10–15 vs DoorDash</p></div></div>
+        <div class="alert alert-success">✅ Every customer who orders through these links instead of DoorDash = more money directly in your bank account.</div>
+        <div class="card">
+          <div class="card-header"><h3>Your Direct Ordering Links</h3></div>
+          <div class="card-body">
+            <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px;">CLOVER DIRECT ORDER PAGE</div>
+            <div class="link-box">
+              <div class="link-url">https://www.clover.com/online-ordering/yak-n-yeti-cedar-park</div>
+              <button class="copy-btn" onclick="copyText('https://www.clover.com/online-ordering/yak-n-yeti-cedar-park')">Copy</button>
+            </div>
+            <div style="font-size:12px;font-weight:700;color:var(--muted);margin:14px 0 6px;">YOUR WEBSITE</div>
+            <div class="link-box">
+              <div class="link-url">https://yaknyeti.us</div>
+              <button class="copy-btn" onclick="copyText('https://yaknyeti.us')">Copy</button>
+            </div>
+            <div style="margin-top:16px;">
+              <div style="font-size:13px;font-weight:700;margin-bottom:10px;">Put this link everywhere:</div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                <button class="btn btn-secondary btn-sm" onclick="copyText('https://www.clover.com/online-ordering/yak-n-yeti-cedar-park');showToast('Copied! Paste in Instagram bio')">📸 Instagram Bio</button>
+                <button class="btn btn-secondary btn-sm" onclick="copyText('https://www.clover.com/online-ordering/yak-n-yeti-cedar-park');showToast('Copied! Paste on Facebook page')">📘 Facebook</button>
+                <button class="btn btn-secondary btn-sm" onclick="copyText('https://www.clover.com/online-ordering/yak-n-yeti-cedar-park');showToast('Copied! Add to Google Business profile')">🔍 Google Business</button>
+                <button class="btn btn-secondary btn-sm" onclick="copyText('https://www.clover.com/online-ordering/yak-n-yeti-cedar-park');showToast('Copied! Share on WhatsApp')">💬 WhatsApp</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Platform Fee Comparison</h3></div>
+          <div class="card-body-flush">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Platform</th><th>On $50 Order</th><th>You Keep</th><th>Recommendation</th></tr></thead>
+                <tbody>
+                  <tr><td>✅ <strong>Clover Direct</strong></td><td>~$1.85 (3.5% fee)</td><td style="color:var(--green);font-weight:700;">$48.15</td><td><span class="badge badge-green">Push this hardest</span></td></tr>
+                  <tr><td>⚠️ DoorDash (no promos)</td><td>~$10–15 commission</td><td style="color:var(--orange);font-weight:700;">~$35–40</td><td><span class="badge badge-orange">Keep — remove promos</span></td></tr>
+                  <tr><td>🔴 DoorDash (with promos)</td><td>~$22–27 total</td><td style="color:var(--red);font-weight:700;">~$23–28</td><td><span class="badge badge-red">Turn off promos NOW</span></td></tr>
+                  <tr><td>⚠️ Uber Eats</td><td>~$10–15 commission</td><td style="color:var(--orange);font-weight:700;">~$35–40</td><td><span class="badge badge-orange">Remove promos</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── HOURS ── -->
+      <div class="page" id="page-hours">
+        <div class="page-header"><div class="page-header-text"><h2>Business Hours</h2><p>Toggle days and edit your opening times</p></div></div>
+        <div class="card">
+          <div class="card-body" id="hoursBody"></div>
+          <div style="padding:0 18px 18px;"><button class="btn btn-primary" onclick="saveHours()">💾 Save Hours</button></div>
+        </div>
+      </div>
+
+      <!-- ── SETTINGS ── -->
+      <div class="page" id="page-settings">
+        <div class="page-header"><div class="page-header-text"><h2>Settings</h2><p>Restaurant info and account credentials</p></div></div>
+        <div class="card">
+          <div class="card-header"><h3>Restaurant Information</h3></div>
+          <div class="card-body">
+            <div class="form-row">
+              <div class="field"><label>Restaurant Name</label><input type="text" id="setName" value="Yak N Yeti" /></div>
+              <div class="field"><label>Phone</label><input type="text" id="setPhone" value="(512) 514-1180" /></div>
+            </div>
+            <div class="field"><label>Address</label><input type="text" id="setAddr" value="200 Buttercup Creek Blvd, Suite 125, Cedar Park, TX 78613" /></div>
+            <div class="field"><label>Email</label><input type="text" id="setEmail" value="contact@yaknyeti.us" /></div>
+            <button class="btn btn-primary" onclick="showToast('✅ Settings saved!')">Save Changes</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>🔐 Change Login Credentials</h3></div>
+          <div class="card-body">
+            <div class="alert alert-warning">⚠️ Change the default password immediately so only you can access this dashboard.</div>
+            <div class="form-row">
+              <div class="field"><label>New Username</label><input type="text" id="newUser" placeholder="e.g. yaknyeti_admin" /></div>
+              <div class="field"><label>New Password</label><input type="password" id="newPass" placeholder="Choose a strong password" /></div>
+            </div>
+            <button class="btn btn-primary" onclick="saveCredentials()">Update Credentials</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>📱 Real Data Integration Guide</h3></div>
+          <div class="card-body">
+            <div style="font-size:13px;line-height:1.8;color:var(--muted);">
+              <p style="margin-bottom:8px;">To get real live sales and order data in this dashboard, you need a developer to connect the following APIs:</p>
+              <p>• <strong>Clover API:</strong> <a href="https://docs.clover.com" target="_blank" style="color:var(--red);">docs.clover.com</a> — for real orders, payments, menu sync</p>
+              <p>• <strong>DoorDash Drive API:</strong> <a href="https://developer.doordash.com" target="_blank" style="color:var(--red);">developer.doordash.com</a> — for delivery tracking</p>
+              <p>• <strong>Uber Eats API:</strong> <a href="https://developer.uber.com" target="_blank" style="color:var(--red);">developer.uber.com</a> — for Uber order data</p>
+              <p style="margin-top:8px;">Estimated cost to build full integration: <strong>$500–$1,500 one-time</strong>. Ask Robin Dhakal if he can build this for you.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /main -->
+  </div><!-- /layout -->
+</div><!-- /app -->
+
+<!-- ═══ ADD ITEM MODAL ═══ -->
+<div class="modal-overlay" id="addItemModal">
+  <div class="modal">
+    <div class="modal-header"><h3 id="itemModalTitle">Add Menu Item</h3><button class="modal-close" onclick="closeModal('addItemModal')">×</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="editIdx" value="-1" />
+      <div class="form-row">
+        <div class="field"><label>Item Name *</label><input type="text" id="iName" placeholder="e.g. Chicken Momos" /></div>
+        <div class="field"><label>Category *</label>
+          <select id="iCat" onchange="updateCatOptions()"></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Website Price ($) *</label><input type="number" id="iPrice" placeholder="12.00" step="0.01" oninput="autoAppPrice()" /></div>
+        <div class="field"><label>App Price ($) <small style="color:var(--light);">auto +15%</small></label><input type="number" id="iAppPrice" placeholder="13.80" step="0.01" /></div>
+      </div>
+      <div class="field"><label>Description</label><textarea id="iDesc" placeholder="Describe this dish — good descriptions increase orders!"></textarea></div>
+      <div class="form-row">
+        <div class="field"><label>Status</label>
+          <select id="iStatus"><option value="active">✅ Available</option><option value="inactive">❌ Out of Stock / Unavailable</option></select>
+        </div>
+        <div class="field"><label>Individual Promo on This Item</label>
+          <select id="iPromo"><option value="">No promo on this item</option><option value="5">5% off</option><option value="10">10% off</option><option value="15">15% off</option><option value="20">20% off</option><option value="25">25% off</option></select>
+        </div>
+      </div>
+      <div class="field" id="iPromoNote" style="display:none;">
+        <div class="alert alert-info" style="margin:0;">🎯 This item will show a discount badge. Customers see the original price crossed out and the discounted price.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('addItemModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveItem()">Save Item</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ADD PROMO MODAL ═══ -->
+<div class="modal-overlay" id="addPromoModal">
+  <div class="modal">
+    <div class="modal-header"><h3>Add Promotion / Discount Code</h3><button class="modal-close" onclick="closeModal('addPromoModal')">×</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="field"><label>Promo Code *</label><input type="text" id="pCode" placeholder="WEB15" style="text-transform:uppercase;font-weight:700;" /></div>
+        <div class="field"><label>Discount % *</label><input type="number" id="pPct" placeholder="15" min="1" max="100" /></div>
+      </div>
+      <div class="field"><label>Description</label><input type="text" id="pDesc" placeholder="e.g. 15% off all items when ordering from website" /></div>
+      <div class="form-row">
+        <div class="field"><label>Valid From</label><input type="date" id="pFrom" /></div>
+        <div class="field"><label>Valid Until</label><input type="date" id="pTo" /></div>
+      </div>
+      <div class="field"><label>Applies To</label>
+        <select id="pScope" onchange="toggleItemSelect()">
+          <option value="all">🌐 All items (entire order)</option>
+          <option value="item">🎯 Specific item only</option>
+        </select>
+      </div>
+      <div class="field" id="itemSelectField" style="display:none;"><label>Select Item</label>
+        <select id="pItem"></select>
+      </div>
+      <div class="field"><label>Platform</label>
+        <select id="pPlatform">
+          <option>Website / Clover Direct</option>
+          <option>DoorDash</option>
+          <option>Uber Eats</option>
+          <option>All Platforms</option>
+          <option>Dine-In Only</option>
+          <option>Pickup Only</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('addPromoModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="savePromo()">Save Promotion</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ADD CATEGORY MODAL ═══ -->
+<div class="modal-overlay" id="addCatModal">
+  <div class="modal">
+    <div class="modal-header"><h3>Add Category</h3><button class="modal-close" onclick="closeModal('addCatModal')">×</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Category Name *</label><input type="text" id="newCatName" placeholder="e.g. Chef Specials" /></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('addCatModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCat()">Add Category</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STORAGE KEYS ──
+const K = { creds:'yn_creds', menu:'yn_menu', promos:'yn_promos', hours:'yn_hours', cats:'yn_cats' };
+
+// ── DEFAULT DATA ──
+const DEFAULT_MENU = [
+  {name:'Gobi Manchurian',cat:'Appetizers',price:10,appPrice:11.50,desc:'Crispy cauliflower tossed in spicy Manchurian sauce',status:'active',promo:''},
+  {name:'Chicken Momos',cat:'Appetizers',price:12,appPrice:13.80,desc:'Handcrafted Nepalese dumplings filled with spiced chicken, served with house tomato chutney',status:'active',promo:''},
+  {name:'Sadheko Momo',cat:'Appetizers',price:13,appPrice:14.95,desc:'Spicy tossed momos with onion, tomato and fresh herbs',status:'active',promo:'10'},
+  {name:'Lamb Sekuwa',cat:'Nepalese Specials',price:18,appPrice:20.70,desc:'Traditional Nepali grilled lamb marinated in Himalayan spices',status:'active',promo:''},
+  {name:'Khana Set',cat:'Nepalese Specials',price:14,appPrice:16.10,desc:'Traditional Nepalese thali — rice, lentil dal, seasonal vegetables, pickle and papad',status:'active',promo:''},
+  {name:'Tandoori Shrimp',cat:'Tandoori',price:19,appPrice:21.85,desc:'Juicy shrimp marinated in tandoori spices, grilled in clay oven',status:'active',promo:''},
+  {name:'Chicken Tikka',cat:'Tandoori',price:17,appPrice:19.55,desc:'Tender chicken marinated in spiced yogurt, cooked in tandoor',status:'active',promo:''},
+  {name:'Lamb Biryani',cat:'Biryani',price:17,appPrice:19.55,desc:'Fragrant basmati rice cooked with tender lamb and whole Himalayan spices',status:'active',promo:''},
+  {name:'Chicken Biryani',cat:'Biryani',price:15,appPrice:17.25,desc:'Fragrant basmati rice cooked with spiced chicken',status:'active',promo:''},
+  {name:'Veg Biryani',cat:'Biryani',price:14,appPrice:16.10,desc:'Aromatic basmati rice with seasonal vegetables and spices',status:'active',promo:''},
+  {name:'Aloo Cauli',cat:'Vegetarian',price:13,appPrice:14.95,desc:'Potato and cauliflower cooked with Himalayan spices',status:'active',promo:''},
+  {name:'Chicken Tikka Masala',cat:'Non-Veg',price:16,appPrice:18.40,desc:'Creamy tomato-based curry with tender chicken tikka pieces',status:'active',promo:''},
+  {name:'Shrimp Pepper Fry',cat:'Seafood',price:20,appPrice:23.00,desc:'Sauteed shrimp with fresh cracked pepper and aromatic spices',status:'active',promo:''},
+  {name:'Garlic Naan',cat:'Breads',price:4,appPrice:4.60,desc:'Freshly baked flatbread with garlic butter from the tandoor',status:'active',promo:''},
+  {name:'Lal Mohan',cat:'Desserts',price:6,appPrice:6.90,desc:'Traditional South Asian milk-solid sweet dumplings in sugar syrup',status:'active',promo:''},
+  {name:'Mango Lassi',cat:'Drinks',price:5,appPrice:5.75,desc:'Refreshing blended yogurt drink with fresh mango pulp',status:'active',promo:''},
+];
+const DEFAULT_PROMOS = [
+  {code:'WEB15',pct:15,desc:'15% off entire order — for ordering directly from yaknyeti.us',from:'2025-01-01',to:'2026-12-31',scope:'all',item:'',platform:'Website / Clover Direct',active:true},
+  {code:'PICKUP10',pct:10,desc:'10% off for pickup orders — encourage pickup over delivery',from:'2025-01-01',to:'2026-12-31',scope:'all',item:'',platform:'Pickup Only',active:true},
+  {code:'FIRSTORDER',pct:20,desc:'20% off first direct order — for new customers',from:'2025-01-01',to:'2026-12-31',scope:'all',item:'',platform:'Website / Clover Direct',active:true},
+  {code:'MOMOSPECIAL',pct:15,desc:'15% off Sadheko Momo — promote this dish on social media',from:'2025-01-01',to:'2026-12-31',scope:'item',item:'Sadheko Momo',platform:'Website / Clover Direct',active:true},
+  {code:'DDPROMO30',pct:30,desc:'⚠️ DoorDash promotional discount set by previous owner — COSTING YOU MONEY. Remove from DoorDash merchant portal.',from:'2024-01-01',to:'2026-12-31',scope:'all',item:'',platform:'DoorDash',active:true},
+];
+const DEFAULT_HOURS = [
+  {day:'Monday',open:true,s1:'11:00 AM',e1:'2:30 PM',s2:'4:30 PM',e2:'8:30 PM'},
+  {day:'Tuesday',open:false,s1:'',e1:'',s2:'',e2:''},
+  {day:'Wednesday',open:true,s1:'11:00 AM',e1:'2:30 PM',s2:'4:30 PM',e2:'8:30 PM'},
+  {day:'Thursday',open:true,s1:'11:00 AM',e1:'2:30 PM',s2:'4:30 PM',e2:'8:30 PM'},
+  {day:'Friday',open:true,s1:'11:00 AM',e1:'2:30 PM',s2:'4:30 PM',e2:'8:30 PM'},
+  {day:'Saturday',open:true,s1:'11:00 AM',e1:'2:30 PM',s2:'4:30 PM',e2:'8:30 PM'},
+  {day:'Sunday',open:true,s1:'11:00 AM',e1:'2:30 PM',s2:'4:30 PM',e2:'8:30 PM'},
+];
+const DEFAULT_CATS = ['Appetizers','Nepalese Specials','Tandoori','Biryani','Vegetarian','Non-Veg','Seafood','Breads','Sides','Desserts','Drinks'];
+
+// ── STATE ──
+let menu, promos, hours, cats, curCat='all';
+function load(){
+  try{ menu=JSON.parse(localStorage.getItem(K.menu))||DEFAULT_MENU; }catch(e){ menu=DEFAULT_MENU; }
+  try{ promos=JSON.parse(localStorage.getItem(K.promos))||DEFAULT_PROMOS; }catch(e){ promos=DEFAULT_PROMOS; }
+  try{ hours=JSON.parse(localStorage.getItem(K.hours))||DEFAULT_HOURS; }catch(e){ hours=DEFAULT_HOURS; }
+  try{ cats=JSON.parse(localStorage.getItem(K.cats))||DEFAULT_CATS; }catch(e){ cats=DEFAULT_CATS; }
+}
+function save(){
+  localStorage.setItem(K.menu,JSON.stringify(menu));
+  localStorage.setItem(K.promos,JSON.stringify(promos));
+  localStorage.setItem(K.hours,JSON.stringify(hours));
+  localStorage.setItem(K.cats,JSON.stringify(cats));
+}
+function getCreds(){ try{ return JSON.parse(localStorage.getItem(K.creds))||{u:'admin',p:'yaknyeti2024'}; }catch(e){ return {u:'admin',p:'yaknyeti2024'}; } }
+
+// ── AUTH ──
+function doLogin(){
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value;
+  const c=getCreds();
+  if(u===c.u&&p===c.p){
+    document.getElementById('loginPage').style.display='none';
+    document.getElementById('appPage').style.display='flex';
+    load(); renderAll();
+  } else {
+    document.getElementById('loginError').style.display='block';
+  }
+}
+function doLogout(){
+  document.getElementById('appPage').style.display='none';
+  document.getElementById('loginPage').style.display='flex';
+  document.getElementById('loginPass').value='';
+  document.getElementById('loginError').style.display='none';
+}
+document.getElementById('loginPass').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
+
+// ── NAVIGATION ──
+function showPage(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(el) el.classList.add('active');
+  if(window.innerWidth<=768){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('open'); }
+}
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+
+// ── MODALS ──
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+// ── TOAST ──
+let toastTimer;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ── COPY ──
+function copyText(txt){ navigator.clipboard.writeText(txt).then(()=>showToast('✅ Copied to clipboard!')); }
+
+// ── RENDER ALL ──
+function renderAll(){
+  updateStats(); renderMenu(); renderPromos(); renderHours(); renderCats(); renderOrders(); populateCatSelects();
+}
+
+// ── STATS ──
+function updateStats(){
+  document.getElementById('statMenuCount').textContent=menu.length;
+  document.getElementById('statPromoCount').textContent=promos.filter(p=>p.active).length;
+}
+
+// ── MENU ──
+function renderMenu(){
+  const filtered=curCat==='all'?menu:menu.filter(i=>i.cat===curCat);
+  document.getElementById('menuBody').innerHTML=filtered.map((item)=>{
+    const idx=menu.indexOf(item);
+    const ap=(item.appPrice||+(item.price*1.15).toFixed(2)).toFixed(2);
+    const promoTag=item.promo?`<span class="badge badge-orange">${item.promo}% off</span>`:`<span style="color:var(--light);font-size:12px;">—</span>`;
+    return `<tr>
+      <td><strong>${item.name}</strong><br><span style="font-size:11px;color:var(--light);">${(item.desc||'').substring(0,48)}${item.desc&&item.desc.length>48?'...':''}</span></td>
+      <td><span class="badge badge-gray">${item.cat}</span></td>
+      <td><strong>$${(+item.price).toFixed(2)}</strong></td>
+      <td style="color:var(--muted);">$${ap}</td>
+      <td>${promoTag}</td>
+      <td><span class="badge ${item.status==='active'?'badge-green':'badge-red'}">${item.status==='active'?'Available':'Unavailable'}</span></td>
+      <td style="white-space:nowrap;">
+        <button class="btn btn-secondary btn-xs" onclick="editItem(${idx})" style="margin-right:4px;">Edit</button>
+        <button class="btn btn-danger btn-xs" onclick="deleteItem(${idx})">Del</button>
+      </td>
+    </tr>`;
+  }).join('');
+  renderCatTabs();
+}
+
+function renderCatTabs(){
+  const allCats=['all',...cats];
+  document.getElementById('catTabs').innerHTML=allCats.map(c=>`<div class="cat-tab ${curCat===c?'active':''}" onclick="setCat('${c}',this)">${c==='all'?'All Items':c}</div>`).join('');
+}
+
+function setCat(c){ curCat=c; renderMenu(); }
+
+function openAddItem(){
+  document.getElementById('itemModalTitle').textContent='Add Menu Item';
+  document.getElementById('editIdx').value='-1';
+  ['iName','iPrice','iAppPrice','iDesc'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('iStatus').value='active';
+  document.getElementById('iPromo').value='';
+  document.getElementById('iPromoNote').style.display='none';
+  populateCatSelects();
+  openModal('addItemModal');
+}
+
+function editItem(idx){
+  const item=menu[idx];
+  document.getElementById('itemModalTitle').textContent='Edit Item';
+  document.getElementById('editIdx').value=idx;
+  document.getElementById('iName').value=item.name;
+  document.getElementById('iCat').value=item.cat;
+  document.getElementById('iPrice').value=item.price;
+  document.getElementById('iAppPrice').value=(item.appPrice||+(item.price*1.15).toFixed(2)).toFixed(2);
+  document.getElementById('iDesc').value=item.desc||'';
+  document.getElementById('iStatus').value=item.status;
+  document.getElementById('iPromo').value=item.promo||'';
+  document.getElementById('iPromoNote').style.display=item.promo?'block':'none';
+  openModal('addItemModal');
+}
+
+document.getElementById('iPromo').addEventListener('change',function(){
+  document.getElementById('iPromoNote').style.display=this.value?'block':'none';
+});
+
+function autoAppPrice(){
+  const p=parseFloat(document.getElementById('iPrice').value)||0;
+  document.getElementById('iAppPrice').value=p?(p*1.15).toFixed(2):'';
+}
+
+function saveItem(){
+  const idx=parseInt(document.getElementById('editIdx').value);
+  const nm=document.getElementById('iName').value.trim();
+  const pr=parseFloat(document.getElementById('iPrice').value);
+  if(!nm||!pr){ showToast('❌ Name and price are required'); return; }
+  const item={
+    name:nm, cat:document.getElementById('iCat').value,
+    price:pr, appPrice:parseFloat(document.getElementById('iAppPrice').value)||+(pr*1.15).toFixed(2),
+    desc:document.getElementById('iDesc').value.trim(),
+    status:document.getElementById('iStatus').value,
+    promo:document.getElementById('iPromo').value,
+  };
+  if(idx>=0){ menu[idx]=item; showToast('✅ Item updated!'); }
+  else{ menu.push(item); showToast('✅ Item added!'); }
+  save(); renderMenu(); renderCats(); updateStats(); closeModal('addItemModal');
+}
+
+function deleteItem(idx){
+  if(!confirm(`Delete "${menu[idx].name}"?`)) return;
+  menu.splice(idx,1); save(); renderMenu(); renderCats(); updateStats();
+  showToast('🗑️ Item deleted');
+}
+
+// ── CATEGORIES ──
+function renderCats(){
+  document.getElementById('catListBody').innerHTML=cats.map((c,i)=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);">
+      <div><strong>${c}</strong> <span style="font-size:12px;color:var(--light);margin-left:8px;">${menu.filter(m=>m.cat===c).length} items</span></div>
+      <button class="btn btn-danger btn-xs" onclick="deleteCat(${i})">Delete</button>
+    </div>`).join('');
+}
+
+function saveCat(){
+  const n=document.getElementById('newCatName').value.trim();
+  if(!n){ showToast('❌ Enter a category name'); return; }
+  cats.push(n); save(); renderCats(); populateCatSelects(); closeModal('addCatModal');
+  document.getElementById('newCatName').value='';
+  showToast('✅ Category added!');
+}
+
+function deleteCat(i){
+  if(menu.some(m=>m.cat===cats[i])){ showToast('❌ Remove all items in this category first'); return; }
+  if(!confirm(`Delete category "${cats[i]}"?`)) return;
+  cats.splice(i,1); save(); renderCats(); populateCatSelects();
+  showToast('🗑️ Category deleted');
+}
+
+function populateCatSelects(){
+  const sel=document.getElementById('iCat');
+  sel.innerHTML=cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+  const pItem=document.getElementById('pItem');
+  pItem.innerHTML=menu.map(m=>`<option value="${m.name}">${m.name} ($${m.price})</option>`).join('');
+}
+
+// ── PROMOTIONS ──
+function openAddPromo(){ clearPromoForm(); populateCatSelects(); openModal('addPromoModal'); }
+
+function clearPromoForm(){
+  ['pCode','pPct','pDesc','pFrom','pTo'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('pScope').value='all';
+  document.getElementById('pPlatform').value='Website / Clover Direct';
+  document.getElementById('itemSelectField').style.display='none';
+}
+
+function toggleItemSelect(){
+  document.getElementById('itemSelectField').style.display=document.getElementById('pScope').value==='item'?'block':'none';
+}
+
+function renderPromos(){
+  const el=document.getElementById('promoListEl');
+  el.innerHTML=promos.map((p,i)=>`
+    <div class="promo-card ${!p.active?'inactive':''} ${p.platform==='DoorDash'?'danger':''}">
+      <div class="promo-info">
+        <h4>
+          <span style="font-family:monospace;background:${p.platform==='DoorDash'?'#fee2e2':'#f0fdf4'};padding:2px 8px;border-radius:4px;font-size:14px;">${p.code}</span>
+          &nbsp;${p.pct}% OFF
+          <span class="badge ${p.scope==='item'?'badge-blue':'badge-green'}" style="margin-left:6px;">${p.scope==='item'?'🎯 Item: '+p.item:'🌐 All items'}</span>
+          <span class="badge badge-gray" style="margin-left:4px;">${p.platform}</span>
+          ${p.platform==='DoorDash'?'<span style="color:var(--red);font-size:11px;font-weight:700;margin-left:6px;">⚠️ COSTING YOU MONEY — Remove from DoorDash!</span>':''}
+        </h4>
+        <p>${p.desc}<br>Valid: ${p.from||'—'} → ${p.to||'—'}</p>
+      </div>
+      <div class="promo-actions">
+        <label class="toggle" title="${p.active?'Active':'Paused'}">
+          <input type="checkbox" ${p.active?'checked':''} onchange="togglePromo(${i},this.checked)" />
+          <span class="toggle-slider"></span>
+        </label>
+        <button class="btn btn-danger btn-xs" onclick="deletePromo(${i})">Del</button>
+      </div>
+    </div>`).join('');
+}
+
+function togglePromo(idx,val){ promos[idx].active=val; save(); showToast(val?'✅ Promotion activated':'⏸️ Promotion paused'); }
+function deletePromo(idx){ if(!confirm('Delete this promotion?')) return; promos.splice(idx,1); save(); renderPromos(); updateStats(); showToast('🗑️ Promotion deleted'); }
+
+function savePromo(){
+  const code=document.getElementById('pCode').value.trim().toUpperCase();
+  const pct=parseInt(document.getElementById('pPct').value);
+  if(!code||!pct){ showToast('❌ Code and discount % are required'); return; }
+  promos.push({
+    code, pct,
+    desc:document.getElementById('pDesc').value.trim(),
+    from:document.getElementById('pFrom').value,
+    to:document.getElementById('pTo').value,
+    scope:document.getElementById('pScope').value,
+    item:document.getElementById('pItem').value,
+    platform:document.getElementById('pPlatform').value,
+    active:true,
+  });
+  save(); renderPromos(); updateStats(); closeModal('addPromoModal'); clearPromoForm();
+  showToast('✅ Promotion added!');
+}
+
+// ── HOURS ──
+function renderHours(){
+  document.getElementById('hoursBody').innerHTML=hours.map((h,i)=>`
+    <div class="hours-row">
+      <div style="font-weight:600;font-size:13px;">${h.day}</div>
+      <label class="toggle">
+        <input type="checkbox" id="ht${i}" ${h.open?'checked':''} onchange="toggleHourDay(${i},this.checked)" />
+        <span class="toggle-slider"></span>
+      </label>
+      <div id="hd${i}" style="${h.open?'':'opacity:.35;pointer-events:none'}">
+        <div class="hours-inputs">
+          <input type="text" value="${h.s1}" placeholder="11:00 AM" onchange="hours[${i}].s1=this.value" />
+          <span class="hours-sep">–</span>
+          <input type="text" value="${h.e1}" placeholder="2:30 PM" onchange="hours[${i}].e1=this.value" />
+          <span class="hours-sep">|</span>
+          <input type="text" value="${h.s2}" placeholder="4:30 PM" onchange="hours[${i}].s2=this.value" />
+          <span class="hours-sep">–</span>
+          <input type="text" value="${h.e2}" placeholder="8:30 PM" onchange="hours[${i}].e2=this.value" />
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleHourDay(i,val){
+  hours[i].open=val;
+  const d=document.getElementById('hd'+i);
+  d.style.opacity=val?'1':'0.35';
+  d.style.pointerEvents=val?'auto':'none';
+}
+function saveHours(){ save(); showToast('✅ Hours saved!'); }
+
+// ── ORDERS (sample) ──
+const SAMPLE_ORDERS=[
+  {id:'#1042',items:'Momos x2, Mango Lassi',total:28,platform:'🌐 Direct (Clover)',time:'12:34 PM',keep:'$27.02',status:'Completed'},
+  {id:'#1041',items:'Lamb Biryani, Garlic Naan',total:22,platform:'🔴 DoorDash',time:'12:18 PM',keep:'~$13–15',status:'Completed'},
+  {id:'#1040',items:'Khana Set x2, Lassi',total:33,platform:'🌐 Direct (Clover)',time:'11:55 AM',keep:'$31.84',status:'Completed'},
+  {id:'#1039',items:'Chicken Tikka Masala, Naan',total:20,platform:'🟡 Uber Eats',time:'11:40 AM',keep:'~$12–14',status:'Completed'},
+  {id:'#1038',items:'Sadheko Momo, Chai',total:16,platform:'🌐 Direct (Clover)',time:'11:22 AM',keep:'$15.44',status:'Completed'},
+  {id:'#1037',items:'Tandoori Shrimp, Biryani',total:38,platform:'🔴 DoorDash',time:'11:10 AM',keep:'~$22–26',status:'Completed'},
+];
+function renderOrders(){
+  document.getElementById('ordersBody').innerHTML=SAMPLE_ORDERS.map(o=>`
+    <tr>
+      <td><strong>${o.id}</strong></td>
+      <td>${o.items}</td>
+      <td><strong>$${o.total}</strong></td>
+      <td>${o.platform}</td>
+      <td style="color:var(--muted);">${o.time}</td>
+      <td style="font-weight:700;color:${o.platform.includes('Direct')?'var(--green)':'var(--orange)'};">${o.keep}</td>
+      <td><span class="badge badge-green">${o.status}</span></td>
+    </tr>`).join('');
+}
+
+// ── SETTINGS ──
+function saveCredentials(){
+  const u=document.getElementById('newUser').value.trim();
+  const p=document.getElementById('newPass').value;
+  if(!u||!p){ showToast('❌ Fill in both username and password'); return; }
+  localStorage.setItem(K.creds,JSON.stringify({u,p}));
+  document.getElementById('newUser').value='';
+  document.getElementById('newPass').value='';
+  showToast('✅ Login credentials updated! Use new credentials next time.');
+}
+</script>
+</body>
+</html>
