@@ -388,12 +388,53 @@
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
               <div style="background:#f0fdf4;border-radius:8px;padding:14px;border:1px solid #bbf7d0;">
                 <div style="font-weight:700;font-size:13px;color:var(--green-text);margin-bottom:6px;">✅ Overall Promotion</div>
-                <div style="font-size:12px;color:var(--green-text);line-height:1.6;">Applies 15% off to <strong>everything</strong> in the cart. Customer enters code WEB15 at checkout. Best for driving all direct orders.</div>
+                <div style="font-size:12px;color:var(--green-text);line-height:1.6;">Applies 10% off to <strong>everything</strong> in the cart. Customer enters code WEB10 at checkout. Best for driving all direct orders.</div>
               </div>
               <div style="background:#eff6ff;border-radius:8px;padding:14px;border:1px solid #bfdbfe;">
                 <div style="font-weight:700;font-size:13px;color:var(--info-text);margin-bottom:6px;">🎯 Individual Item Promo</div>
                 <div style="font-size:12px;color:var(--info-text);line-height:1.6;">Applies discount to <strong>specific items</strong> only. E.g. "20% off Momos this weekend." Great for slow days or promoting a dish.</div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── LIVE WEBSITE BANNER CONTROL ── -->
+        <div class="card" style="border:2px solid #27ae60;margin-bottom:16px;">
+          <div class="card-header" style="background:#f0fdf4;">
+            <h3 style="color:#1a6b40;">🌐 Live Website Promo Banner</h3>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:12px;color:#2d9a5d;font-weight:600;" id="bannerStatusLabel">Loading…</span>
+              <label class="toggle">
+                <input type="checkbox" id="bannerToggle" onchange="toggleBannerActive(this.checked)" />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="alert alert-success" style="margin-bottom:14px;">
+              ✅ Controls the red banner at the top of <strong>menu.html</strong> and <strong>index.html</strong>. Change code/% and click <strong>Save &amp; Publish</strong> — live on your site within ~60 seconds.
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 2fr;gap:12px;margin-bottom:14px;">
+              <div class="field" style="margin:0;">
+                <label>Promo Code</label>
+                <input type="text" id="bannerCode" value="WEB10" placeholder="WEB10" style="text-transform:uppercase;font-weight:700;font-family:monospace;" oninput="this.value=this.value.toUpperCase();previewBanner();" />
+              </div>
+              <div class="field" style="margin:0;">
+                <label>Discount %</label>
+                <input type="number" id="bannerPct" value="10" min="1" max="100" placeholder="10" oninput="previewBanner();" />
+              </div>
+              <div class="field" style="margin:0;">
+                <label>Custom Message (optional — replaces default text)</label>
+                <input type="text" id="bannerMsg" placeholder="e.g. Weekend Special! Save big ordering direct" oninput="previewBanner();" />
+              </div>
+            </div>
+            <div style="margin-bottom:14px;">
+              <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Live Preview</div>
+              <div id="bannerPreview" style="background:#C0392B;color:#fff;text-align:center;padding:9px 16px;border-radius:6px;font-size:13px;font-weight:700;"></div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn btn-success" onclick="saveBannerAndPublish()">💾 Save &amp; Publish to Live Site</button>
+              <button class="btn btn-secondary" onclick="saveBannerLocal()">Save Draft (local only)</button>
             </div>
           </div>
         </div>
@@ -492,6 +533,26 @@
               <p>• <strong>Uber Eats API:</strong> <a href="https://developer.uber.com" target="_blank" style="color:var(--red);">developer.uber.com</a> — for Uber order data</p>
               <p style="margin-top:8px;">Estimated cost to build full integration: <strong>$500–$1,500 one-time</strong>. Ask Robin Dhakal if he can build this for you.</p>
             </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>🚀 Publish to GitHub (Push menu.json live)</h3></div>
+          <div class="card-body">
+            <div class="alert alert-info" style="margin-bottom:14px;">
+              📌 This publishes your menu prices, promotions, hours, and banner settings to your live website. Required once after every change you want visitors to see.
+            </div>
+            <div class="field">
+              <label>GitHub Personal Access Token</label>
+              <input type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off" />
+            </div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6;">
+              Don't have a token? <a href="https://github.com/settings/tokens/new?scopes=repo&description=YakNYeti" target="_blank" style="color:var(--red);font-weight:700;">Create one here</a> — select <strong>repo</strong> scope, no expiry.
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn btn-primary" onclick="publishToGitHub()">🚀 Publish menu.json to Live Site</button>
+              <button class="btn btn-secondary" onclick="saveToken()">💾 Save Token</button>
+            </div>
+            <div id="publishStatus" style="margin-top:12px;font-size:13px;display:none;"></div>
           </div>
         </div>
       </div>
@@ -617,10 +678,10 @@ const DEFAULT_MENU = [
   {name:'Mango Lassi',cat:'Drinks',price:5,appPrice:5.75,desc:'Refreshing blended yogurt drink with fresh mango pulp',status:'active',promo:''},
 ];
 const DEFAULT_PROMOS = [
-  {code:'WEB15',pct:15,desc:'15% off entire order — for ordering directly from yaknyeti.us',from:'2025-01-01',to:'2026-12-31',scope:'all',item:'',platform:'Website / Clover Direct',active:true},
+  {code:'WEB10',pct:10,desc:'10% off entire order — for ordering directly from yaknyeti.us',from:'2025-01-01',to:'2026-12-31',scope:'all',item:'',platform:'Website / Clover Direct',active:true},
   {code:'PICKUP10',pct:10,desc:'10% off for pickup orders — encourage pickup over delivery',from:'2025-01-01',to:'2026-12-31',scope:'all',item:'',platform:'Pickup Only',active:true},
   {code:'FIRSTORDER',pct:20,desc:'20% off first direct order — for new customers',from:'2025-01-01',to:'2026-12-31',scope:'all',item:'',platform:'Website / Clover Direct',active:true},
-  {code:'MOMOSPECIAL',pct:15,desc:'15% off Sadheko Momo — promote this dish on social media',from:'2025-01-01',to:'2026-12-31',scope:'item',item:'Sadheko Momo',platform:'Website / Clover Direct',active:true},
+  {code:'MOMOSPECIAL',pct:10,desc:'10% off Sadheko Momo — promote this dish on social media',from:'2025-01-01',to:'2026-12-31',scope:'item',item:'Sadheko Momo',platform:'Website / Clover Direct',active:true},
   {code:'DDPROMO30',pct:30,desc:'⚠️ DoorDash promotional discount set by previous owner — COSTING YOU MONEY. Remove from DoorDash merchant portal.',from:'2024-01-01',to:'2026-12-31',scope:'all',item:'',platform:'DoorDash',active:true},
 ];
 const DEFAULT_HOURS = [
@@ -702,7 +763,7 @@ function copyText(txt){ navigator.clipboard.writeText(txt).then(()=>showToast('�
 
 // ── RENDER ALL ──
 function renderAll(){
-  updateStats(); renderMenu(); renderPromos(); renderHours(); renderCats(); renderOrders(); populateCatSelects();
+  updateStats(); renderMenu(); renderPromos(); renderHours(); renderCats(); renderOrders(); populateCatSelects(); loadBanner();
 }
 
 // ── STATS ──
@@ -943,6 +1004,127 @@ function renderOrders(){
 }
 
 // ── SETTINGS ──
+
+// ── SITE BANNER ──
+const K_BANNER = 'yn_site_banner';
+const DEFAULT_BANNER = {active:true, code:'WEB10', pct:10, msg:''};
+
+function loadBanner(){
+  let b;
+  try{ b=JSON.parse(localStorage.getItem(K_BANNER))||DEFAULT_BANNER; }catch(e){ b=DEFAULT_BANNER; }
+  document.getElementById('bannerToggle').checked = !!b.active;
+  document.getElementById('bannerCode').value = b.code||'WEB10';
+  document.getElementById('bannerPct').value  = b.pct||10;
+  document.getElementById('bannerMsg').value  = b.msg||'';
+  document.getElementById('bannerStatusLabel').textContent = b.active ? '🟢 Banner is ON' : '⚫ Banner is OFF';
+  previewBanner();
+}
+
+function toggleBannerActive(val){
+  let b; try{ b=JSON.parse(localStorage.getItem(K_BANNER))||DEFAULT_BANNER; }catch(e){ b=DEFAULT_BANNER; }
+  b.active=val; localStorage.setItem(K_BANNER,JSON.stringify(b));
+  document.getElementById('bannerStatusLabel').textContent = val?'🟢 Banner is ON':'⚫ Banner is OFF';
+  showToast(val?'✅ Banner ON — publish to push live':'⚫ Banner OFF — publish to push live');
+}
+
+function previewBanner(){
+  const code = (document.getElementById('bannerCode').value||'WEB10').toUpperCase();
+  const pct  = document.getElementById('bannerPct').value||'10';
+  const msg  = document.getElementById('bannerMsg').value.trim();
+  const text = msg ? msg+' — Use code' : '🎉 Order Direct &amp; Save '+pct+'% — Use code';
+  document.getElementById('bannerPreview').innerHTML =
+    text+' <span style="background:rgba(255,255,255,.2);padding:2px 9px;border-radius:4px;font-family:monospace;letter-spacing:2px;">'+code+'</span> at checkout &nbsp;·&nbsp; <a href="https://www.clover.com/online-ordering/yak-n-yeti-cedar-park" style="color:#FFE4B5;">Order Now →</a>';
+}
+
+function saveBannerLocal(){
+  const b = {
+    active: document.getElementById('bannerToggle').checked,
+    code:   document.getElementById('bannerCode').value.trim().toUpperCase()||'WEB10',
+    pct:    parseInt(document.getElementById('bannerPct').value)||10,
+    msg:    document.getElementById('bannerMsg').value.trim(),
+    updated: new Date().toISOString()
+  };
+  localStorage.setItem(K_BANNER, JSON.stringify(b));
+  previewBanner();
+  showToast('✅ Banner saved locally — click Publish to push to live site');
+}
+
+function saveBannerAndPublish(){
+  saveBannerLocal();
+  // Trigger existing GitHub publish with banner included
+  publishToGitHub();
+}
+
+
+// ── GITHUB PUBLISH ──
+const K_TOKEN = 'yn_gh_token';
+const GH_USER = 'codingnoob3014';
+const GH_REPO = 'Yak_N_Yeti';
+const GH_BRANCH = 'master';
+const GH_FILE = 'menu.json';
+
+function saveToken(){
+  const t = document.getElementById('ghToken').value.trim();
+  if(!t){ showToast('❌ Enter your GitHub token'); return; }
+  localStorage.setItem(K_TOKEN, t);
+  showToast('✅ Token saved securely in your browser');
+}
+
+async function publishToGitHub(){
+  const token = document.getElementById('ghToken').value.trim() || localStorage.getItem(K_TOKEN);
+  if(!token){ showToast('❌ Enter your GitHub token in Settings first'); return; }
+
+  let siteBanner;
+  try{ siteBanner = JSON.parse(localStorage.getItem(K_BANNER))||DEFAULT_BANNER; }catch(e){ siteBanner=DEFAULT_BANNER; }
+
+  const payload = { items: menu, promos, hours, cats, sitePromo: siteBanner, updated: new Date().toISOString() };
+  const jsonContent = JSON.stringify(payload, null, 2);
+  const encoded = btoa(unescape(encodeURIComponent(jsonContent)));
+
+  const statusEl = document.getElementById('publishStatus');
+  if(statusEl){ statusEl.style.display='block'; statusEl.textContent='⏳ Fetching current file SHA…'; statusEl.style.color='var(--muted)'; }
+
+  try{
+    // Get current file SHA (needed to update existing file)
+    const shaRes = await fetch(`https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${GH_FILE}?ref=${GH_BRANCH}`, {
+      headers: { Authorization: 'token '+token, Accept: 'application/vnd.github.v3+json' }
+    });
+    let sha = null;
+    if(shaRes.ok){ const d = await shaRes.json(); sha = d.sha; }
+
+    if(statusEl) statusEl.textContent = '⏳ Publishing to GitHub…';
+
+    const body = { message: 'Update menu.json via admin dashboard', content: encoded, branch: GH_BRANCH };
+    if(sha) body.sha = sha;
+
+    const pubRes = await fetch(`https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${GH_FILE}`, {
+      method: 'PUT',
+      headers: { Authorization: 'token '+token, Accept: 'application/vnd.github.v3+json', 'Content-Type':'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    if(pubRes.ok){
+      if(statusEl){ statusEl.textContent='✅ Published! Live on yaknyeti.us in ~60 seconds.'; statusEl.style.color='var(--green)'; }
+      showToast('🚀 menu.json published to GitHub!');
+    } else {
+      const err = await pubRes.json();
+      if(statusEl){ statusEl.textContent='❌ Error: '+(err.message||pubRes.status); statusEl.style.color='var(--red)'; }
+      showToast('❌ Publish failed — check token permissions');
+    }
+  }catch(e){
+    if(statusEl){ statusEl.textContent='❌ Network error: '+e.message; statusEl.style.color='var(--red)'; }
+    showToast('❌ Publish error — check console');
+    console.error(e);
+  }
+}
+
+// Load saved token on settings page load
+(function(){
+  const t = localStorage.getItem(K_TOKEN);
+  const el = document.getElementById('ghToken');
+  if(t && el) el.placeholder = '(token saved — click Publish directly)';
+})();
+
 function saveCredentials(){
   const u=document.getElementById('newUser').value.trim();
   const p=document.getElementById('newPass').value;
