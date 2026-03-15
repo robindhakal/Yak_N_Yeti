@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Yak N Yeti — Sign In</title>
+<!--
+  SETUP REQUIRED (one-time):
+  1. GOOGLE SIGN-IN: console.cloud.google.com → Create project → Credentials
+     → OAuth 2.0 Client ID → Web app → add https://yaknyeti.us
+     → paste Client ID below replacing YOUR_GOOGLE_CLIENT_ID_HERE
+
+  2. EMAIL OTP: emailjs.com → Free account → Email Services → connect Gmail
+     → Email Templates → create template with variables {{otp}} {{to_email}}
+     → paste Service ID, Template ID, Public Key below
+-->
+<meta name="google-signin-client_id" content="YOUR_GOOGLE_CLIENT_ID_HERE">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --red:#C0392B;--red-dark:#A93226;--orange:#E67E22;
+  --bg:#f5f5f5;--white:#fff;--border:#e0e0e0;
+  --text:#1a1a1a;--muted:#666;--light:#aaa;
+  --green:#27ae60;--green-bg:#e8f8f0;--green-dark:#1a6b40;
+  --blue:#1a73e8;--blue-bg:#e8f0fe;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(150deg,#1a0a08 0%,#2d0d06 40%,#C0392B 100%);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:70px 16px 40px;}
+
+/* TOPBAR */
+.topbar{position:fixed;top:0;left:0;right:0;background:rgba(0,0,0,.45);backdrop-filter:blur(10px);height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100;}
+.tl{color:#FFE4B5;font-weight:700;font-size:15px;text-decoration:none;display:flex;align-items:center;gap:8px;}
+.tl-dot{background:var(--red);width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;}
+.tr{color:rgba(255,228,181,.7);font-size:13px;text-decoration:none;}
+.tr:hover{color:#FFE4B5;}
+
+/* HERO */
+.hero{color:#FFE4B5;text-align:center;margin-bottom:24px;}
+.hero h1{font-size:26px;font-weight:700;margin-bottom:4px;}
+.hero p{font-size:13px;color:rgba(255,228,181,.6);}
+
+/* TABS */
+.tabs{display:flex;background:rgba(0,0,0,.3);border-radius:12px;padding:4px;margin-bottom:0;width:100%;max-width:440px;}
+.tab{flex:1;padding:10px;border:none;background:none;border-radius:9px;cursor:pointer;font-size:13px;font-weight:600;color:rgba(255,255,255,.55);transition:all .2s;}
+.tab.active{background:#fff;color:var(--red);box-shadow:0 2px 8px rgba(0,0,0,.2);}
+
+/* CARD */
+.card{background:#fff;border-radius:0 0 20px 20px;padding:28px 28px 24px;width:100%;max-width:440px;box-shadow:0 24px 80px rgba(0,0,0,.4);}
+.tabs-card{border-radius:12px 12px 0 0;}
+
+/* FIELDS */
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+.field input{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;color:var(--text);background:#fafafa;transition:border .2s;}
+.field input:focus{outline:none;border-color:var(--red);background:#fff;}
+
+/* BTNS */
+.btn{width:100%;padding:12px;border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;text-decoration:none;}
+.btn-red{background:var(--red);color:#fff;}
+.btn-red:hover{background:var(--red-dark);}
+.btn-outline-red{background:transparent;color:var(--red);border:2px solid var(--red);}
+.btn-outline-red:hover{background:var(--red);color:#fff;}
+.btn-ghost{background:#f5f5f5;color:var(--text);border:1.5px solid var(--border);}
+.btn-ghost:hover{background:#ebebeb;}
+.btn-green{background:var(--green);color:#fff;}
+.btn-green:hover{background:#219150;}
+
+/* DIVIDER */
+.divider{display:flex;align-items:center;gap:10px;margin:14px 0;color:var(--light);font-size:11px;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* PROMO BOX */
+.promo-box{background:linear-gradient(135deg,#fff8f0,#fff3e5);border:1.5px solid #fcd9a0;border-radius:10px;padding:14px 16px;margin-bottom:18px;text-align:center;}
+.promo-code{font-family:monospace;font-size:20px;font-weight:700;color:var(--red);letter-spacing:3px;background:rgba(192,57,43,.08);padding:5px 16px;border-radius:5px;display:inline-block;margin:6px 0;}
+.promo-box p{font-size:12px;color:var(--muted);}
+.promo-hl{font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px;}
+
+/* GOOGLE BTN */
+.g-wrap{display:flex;justify-content:center;margin-bottom:4px;}
+
+/* NOTICE BOX */
+.notice{background:#fff8e1;border:1.5px solid #fcd34d;border-radius:8px;padding:12px 14px;font-size:12px;color:#92400e;line-height:1.7;margin-bottom:14px;}
+.notice strong{display:block;font-size:13px;margin-bottom:3px;}
+.notice a{color:var(--red);font-weight:700;}
+.notice ol{padding-left:15px;margin-top:4px;}
+
+/* OTP STEPS */
+.otp-step{display:none;}
+.otp-step.active{display:block;}
+.otp-row{display:flex;gap:8px;}
+.otp-row input{flex:1;text-align:center;font-size:20px;font-weight:700;letter-spacing:4px;font-family:monospace;}
+.otp-row .btn{width:auto;padding:10px 18px;flex-shrink:0;}
+.resend-link{text-align:center;font-size:12px;color:var(--light);margin-top:10px;}
+.resend-link a{color:var(--red);cursor:pointer;text-decoration:underline;}
+
+/* SWITCH LINK */
+.switch-link{text-align:center;font-size:13px;color:var(--muted);margin-top:16px;}
+.switch-link a{color:var(--red);font-weight:700;cursor:pointer;text-decoration:none;}
+
+/* ── CUSTOMER PROFILE ── */
+#profileView{display:none;}
+.profile-card{background:#fff;border-radius:20px;padding:0;width:100%;max-width:440px;box-shadow:0 24px 80px rgba(0,0,0,.4);overflow:hidden;margin-top:-4px;}
+
+/* Profile header */
+.profile-header{background:linear-gradient(135deg,#1a0a08,#C0392B);padding:24px 22px 20px;position:relative;}
+.profile-avatar-row{display:flex;align-items:center;gap:14px;margin-bottom:14px;}
+.p-avatar{width:58px;height:58px;border-radius:50%;border:3px solid rgba(255,255,255,.4);object-fit:cover;flex-shrink:0;}
+.p-avatar-ph{width:58px;height:58px;border-radius:50%;border:3px solid rgba(255,255,255,.4);background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;font-weight:700;flex-shrink:0;}
+.p-name{color:#FFE4B5;font-size:18px;font-weight:700;}
+.p-email{color:rgba(255,228,181,.65);font-size:12px;margin-top:2px;}
+.p-verified{background:rgba(39,174,96,.3);color:#a8f0c6;font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:4px;margin-top:5px;}
+.promo-strip{background:rgba(255,255,255,.12);border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;}
+.promo-strip-left .pl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:rgba(255,228,181,.6);margin-bottom:3px;}
+.promo-strip-left .pc{font-family:monospace;font-size:18px;font-weight:700;color:#FFE4B5;letter-spacing:3px;}
+.copy-code-btn{background:var(--red);border:none;color:#fff;padding:7px 14px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;}
+.copy-code-btn:hover{background:var(--red-dark);}
+
+/* Profile sections */
+.p-section{padding:18px 20px;border-bottom:1px solid #f0f0f0;}
+.p-section:last-child{border-bottom:none;}
+.section-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;}
+
+/* Order links */
+.platform-list{display:flex;flex-direction:column;gap:6px;}
+.plt-item{display:flex;align-items:center;justify-content:space-between;padding:10px 13px;border-radius:9px;border:1.5px solid var(--border);text-decoration:none;transition:all .18s;}
+.plt-item:hover{border-color:var(--red);background:#fef7f6;}
+.plt-item.best{border-color:var(--green);background:#f0fdf4;}
+.plt-item .pi-l{font-size:13px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px;}
+.plt-item.best .pi-l{color:var(--green-dark);}
+.plt-item .pi-r{font-size:11px;color:var(--muted);}
+
+/* Favourites */
+.fav-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;}
+.fav-item{border:1.5px solid var(--border);border-radius:8px;padding:10px 10px 8px;text-align:center;cursor:pointer;transition:all .18s;position:relative;}
+.fav-item:hover{border-color:var(--red);}
+.fav-item.saved{border-color:var(--red);background:#fef7f6;}
+.fav-emoji{font-size:22px;margin-bottom:4px;}
+.fav-name{font-size:11px;font-weight:600;color:var(--text);line-height:1.3;}
+.fav-heart{position:absolute;top:5px;right:7px;font-size:14px;color:var(--light);}
+.fav-item.saved .fav-heart{color:var(--red);}
+.fav-empty{color:var(--light);font-size:12px;text-align:center;padding:16px 0;}
+
+/* Orders section */
+.orders-placeholder{background:#f9f9f9;border:1.5px dashed var(--border);border-radius:10px;padding:18px;text-align:center;}
+.orders-placeholder .oi{font-size:28px;margin-bottom:8px;}
+.orders-placeholder p{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:12px;}
+
+/* Recommendations */
+.rec-list{display:flex;flex-direction:column;gap:8px;}
+.rec-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:#f9f9f9;border-radius:9px;border:1px solid #eeecec;}
+.rec-icon{font-size:22px;flex-shrink:0;margin-top:2px;}
+.rec-text{font-size:12px;color:var(--text);line-height:1.5;}
+.rec-text strong{font-size:13px;display:block;margin-bottom:2px;}
+.rec-tag{display:inline-block;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin-top:4px;}
+.rec-tag.green{background:var(--green);}
+.rec-tag.orange{background:var(--orange);}
+
+/* Signout */
+.signout-row{padding:14px 20px;text-align:center;}
+.signout-btn{background:none;border:none;color:var(--light);font-size:12px;cursor:pointer;text-decoration:underline;}
+.signout-btn:hover{color:var(--red);}
+
+/* Merchant */
+.m-icon-row{text-align:center;margin-bottom:18px;}
+.m-icon{width:54px;height:54px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;color:#fff;font-size:22px;font-weight:700;}
+.error-msg{color:var(--red);font-size:13px;text-align:center;margin-top:8px;display:none;}
+.hint{font-size:12px;color:var(--light);text-align:center;margin-top:14px;line-height:1.6;}
+
+@media(max-width:480px){
+  .card{padding:22px 16px 20px;}
+  .profile-header{padding:20px 16px 16px;}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a href="index.html" class="tl"><div class="tl-dot">Y</div> Yak N Yeti</a>
+  <a href="index.html" class="tr">← Back to Home</a>
+</div>
+
+<div class="hero">
+  <h1>🏔️ Welcome</h1>
+  <p>Sign in to order, save favourites, or access the merchant dashboard</p>
+</div>
+
+<!-- ═══════════════════════════════════
+     AUTH VIEWS (login / signup)
+════════════════════════════════════ -->
+<div id="authView" style="width:100%;max-width:440px;">
+
+  <!-- TABS -->
+  <div class="tabs tabs-card">
+    <button class="tab active" id="tabCust" onclick="switchTab('cust')">🛵 Customer</button>
+    <button class="tab" id="tabMerch" onclick="switchTab('merch')">🔐 Merchant</button>
+  </div>
+
+  <!-- CARD -->
+  <div class="card">
+
+    <!-- ─── CUSTOMER AUTH ─── -->
+    <div id="custAuth">
+
+      <!-- Sub-tabs: Login / Signup -->
+      <div style="display:flex;gap:0;margin-bottom:18px;border-bottom:2px solid #f0f0f0;">
+        <button id="subLogin" onclick="switchSubTab('login')"
+          style="flex:1;border:none;background:none;padding:10px;font-size:13px;font-weight:700;color:var(--red);border-bottom:2.5px solid var(--red);cursor:pointer;margin-bottom:-2px;">Sign In</button>
+        <button id="subSignup" onclick="switchSubTab('signup')"
+          style="flex:1;border:none;background:none;padding:10px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;">New User? Sign Up</button>
+      </div>
+
+      <!-- ── LOGIN PANEL ── -->
+      <div id="loginPanel">
+
+        <!-- EmailJS notice (hidden once configured) -->
+        <div class="notice" id="emailNotice" style="display:none;">
+          <strong>⚙️ Email OTP setup needed (owner action):</strong>
+          <ol>
+            <li>Go to <a href="https://www.emailjs.com" target="_blank">emailjs.com</a> → Free account</li>
+            <li>Email Services → Add Gmail</li>
+            <li>Email Templates → create template with subject "Your Yak N Yeti code" and body: <em>Your verification code is: {{otp}}</em></li>
+            <li>Account → Public Key</li>
+            <li>Paste Service ID, Template ID, Public Key in login.html lines 13–15</li>
+          </ol>
+          Until set up, Google Sign-In still works.
+        </div>
+
+        <!-- Promo teaser -->
+        <div class="promo-box">
+          <div class="promo-hl">🎉 Sign in to get 10% off</div>
+          <div class="promo-code">WEB10</div>
+          <p>Your verified discount code — use it at Clover checkout.</p>
+        </div>
+
+        <!-- Google Sign-In -->
+        <div class="g-wrap"><div id="googleSignInBtn"></div></div>
+        <div id="noGoogleNotice" class="notice" style="display:none;">
+          <strong>⚙️ Google Sign-In not yet configured.</strong> Please set up your Google Client ID (see top of login.html). Customers can still sign up with email below.
+        </div>
+
+        <div class="divider">or sign in with email</div>
+
+        <!-- Email OTP login flow -->
+        <div id="otpStep1" class="otp-step active">
+          <div class="field">
+            <label>Email Address</label>
+            <input type="email" id="loginEmail" placeholder="you@email.com" autocomplete="email"
+              onkeydown="if(event.key==='Enter')sendOTP('login')" />
+          </div>
+          <button class="btn btn-red" onclick="sendOTP('login')">📧 Send Verification Code</button>
+        </div>
+
+        <div id="otpStep2" class="otp-step">
+          <div style="text-align:center;margin-bottom:14px;">
+            <div style="font-size:13px;font-weight:600;color:var(--text);">Code sent to <span id="otpEmailDisplay"></span></div>
+            <div style="font-size:12px;color:var(--muted);margin-top:3px;">Check your inbox (and spam folder)</div>
+          </div>
+          <div class="field">
+            <label>Enter 6-digit code</label>
+            <div class="otp-row">
+              <input type="tel" id="otpInput" placeholder="000000" maxlength="6"
+                onkeydown="if(event.key==='Enter')verifyOTP('login')" />
+              <button class="btn btn-red otp-row" onclick="verifyOTP('login')" style="width:auto;padding:10px 16px;">Verify</button>
+            </div>
+          </div>
+          <div class="resend-link">Didn't get it? <a onclick="sendOTP('login')">Resend code</a> · <a onclick="resetOTPFlow()">Use different email</a></div>
+        </div>
+
+        <div class="switch-link">New here? <a onclick="switchSubTab('signup')">Create an account →</a></div>
+
+      </div>
+      <!-- /loginPanel -->
+
+      <!-- ── SIGNUP PANEL ── -->
+      <div id="signupPanel" style="display:none;">
+        <div class="field"><label>Full Name *</label><input type="text" id="signupName" placeholder="e.g. Priya Sharma" autocomplete="name"/></div>
+        <div class="field"><label>Email Address *</label><input type="email" id="signupEmail" placeholder="you@email.com" autocomplete="email"/></div>
+        <div class="field"><label>Phone (optional)</label><input type="tel" id="signupPhone" placeholder="(512) 000-0000"/></div>
+
+        <button class="btn btn-red" style="margin-bottom:10px;" onclick="sendOTP('signup')">📧 Verify Email &amp; Create Account</button>
+
+        <!-- OTP verify step for signup -->
+        <div id="signupOtpStep" style="display:none;">
+          <div style="text-align:center;background:#f0fdf4;border-radius:8px;padding:12px;margin-bottom:12px;">
+            <div style="font-size:13px;font-weight:600;color:var(--green-dark);">Code sent! Enter it below to confirm your email.</div>
+          </div>
+          <div class="field">
+            <label>Enter 6-digit code</label>
+            <div class="otp-row">
+              <input type="tel" id="signupOtpInput" placeholder="000000" maxlength="6"
+                onkeydown="if(event.key==='Enter')verifyOTP('signup')"/>
+              <button class="btn btn-green" onclick="verifyOTP('signup')" style="width:auto;padding:10px 16px;">Confirm</button>
+            </div>
+          </div>
+          <div class="resend-link"><a onclick="sendOTP('signup')">Resend code</a></div>
+        </div>
+
+        <div class="divider">or</div>
+        <div class="g-wrap"><div id="googleSignInBtn2"></div></div>
+
+        <div class="switch-link">Already have an account? <a onclick="switchSubTab('login')">Sign in →</a></div>
+      </div>
+      <!-- /signupPanel -->
+
+    </div>
+    <!-- /custAuth -->
+
+    <!-- ─── MERCHANT AUTH ─── -->
+    <div id="merchAuth" style="display:none;">
+      <div class="m-icon-row">
+        <div class="m-icon">Y</div>
+        <div style="font-size:15px;font-weight:700;">Merchant Dashboard</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px;">Admin access only</div>
+      </div>
+      <div class="field"><label>Username</label><input type="text" id="mUser" placeholder="admin" autocomplete="username"/></div>
+      <div class="field"><label>Password</label><input type="password" id="mPass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')merchantLogin()"/></div>
+      <button class="btn btn-red" onclick="merchantLogin()">Sign In to Dashboard →</button>
+      <p class="error-msg" id="mError">❌ Incorrect username or password</p>
+      <p class="hint">Staff only. Customers — please use the Customer tab above.</p>
+    </div>
+
+  </div>
+</div>
+<!-- /authView -->
+
+<!-- ═══════════════════════════════════
+     CUSTOMER PROFILE (after login)
+════════════════════════════════════ -->
+<div id="profileView">
+  <div class="profile-card">
+
+    <!-- Header with avatar + promo code -->
+    <div class="profile-header">
+      <div class="profile-avatar-row">
+        <img id="pAvatar" class="p-avatar" src="" alt="" style="display:none;" onerror="this.style.display='none';document.getElementById('pAvatarPh').style.display='flex';"/>
+        <div id="pAvatarPh" class="p-avatar-ph">😊</div>
+        <div>
+          <div class="p-name" id="pName">—</div>
+          <div class="p-email" id="pEmail">—</div>
+          <div class="p-verified" id="pVerified" style="display:none;">✅ Verified Google account</div>
+        </div>
+      </div>
+      <div class="promo-strip">
+        <div class="promo-strip-left">
+          <div class="pl">Your discount code</div>
+          <div class="pc" id="pPromoCode">WEB10</div>
+        </div>
+        <button class="copy-code-btn" id="pCopyBtn" onclick="copyPromo()">📋 Copy</button>
+      </div>
+    </div>
+
+    <!-- Order Now -->
+    <div class="p-section">
+      <div class="section-title">🛵 Order Now</div>
+      <div class="platform-list">
+        <a href="https://www.clover.com/online-ordering/yak-n-yeti-cedar-park" target="_blank" class="plt-item best">
+          <div class="pi-l">✅ Order Direct (Clover)</div>
+          <div class="pi-r">Use WEB10 · best price</div>
+        </a>
+        <a href="https://www.doordash.com/store/yak-n-yeti-cedar-park-342916/" target="_blank" class="plt-item">
+          <div class="pi-l">🔴 DoorDash</div>
+          <div class="pi-r">Higher fees</div>
+        </a>
+        <a href="https://www.ubereats.com/store/yak-n-yeti/ymZKL2EUTjWNJzmi-eN6NA" target="_blank" class="plt-item">
+          <div class="pi-l">🟡 Uber Eats</div>
+          <div class="pi-r">Higher fees</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Saved Favourites -->
+    <div class="p-section">
+      <div class="section-title">
+        ❤️ My Favourites
+        <span style="font-size:11px;color:var(--light);font-weight:400;">tap to save / unsave</span>
+      </div>
+      <div class="fav-grid" id="favGrid"></div>
+    </div>
+
+    <!-- Previous Orders -->
+    <div class="p-section">
+      <div class="section-title">📦 Previous Orders</div>
+      <div class="orders-placeholder">
+        <div class="oi">📋</div>
+        <p>Order history lives inside your Clover account. Click below to view your full order history, receipts, and re-order previous meals.</p>
+        <a href="https://www.clover.com/online-ordering/yak-n-yeti-cedar-park" target="_blank" class="btn btn-outline-red" style="width:auto;padding:9px 22px;font-size:13px;display:inline-flex;">View Orders on Clover →</a>
+      </div>
+    </div>
+
+    <!-- Recommendations -->
+    <div class="p-section">
+      <div class="section-title">🌟 You Might Love These</div>
+      <div class="rec-list">
+        <div class="rec-item">
+          <div class="rec-icon">🥟</div>
+          <div class="rec-text">
+            <strong>Sadheko Momo + Mango Lassi</strong>
+            Our #1 combo — spicy tossed momos cool perfectly with the sweet mango lassi.
+            <span class="rec-tag green">Best Seller Combo</span>
+          </div>
+        </div>
+        <div class="rec-item">
+          <div class="rec-icon">🍱</div>
+          <div class="rec-text">
+            <strong>Nepalese Khana Set + Garlic Naan</strong>
+            The full Nepal experience. Dal, rice &amp; vegetables — the naan makes it complete.
+            <span class="rec-tag">Customer Favourite</span>
+          </div>
+        </div>
+        <div class="rec-item">
+          <div class="rec-icon">🍗</div>
+          <div class="rec-text">
+            <strong>Tandoori Shrimp + Lamb Biryani</strong>
+            Premium surf &amp; turf, Himalayan style. Order both and use WEB10 for 10% off.
+            <span class="rec-tag orange">Great Value Pair</span>
+          </div>
+        </div>
+        <div class="rec-item">
+          <div class="rec-icon">🌶️</div>
+          <div class="rec-text">
+            <strong>Chicken 65 + Chai</strong>
+            Spice lovers' pick — crispy, bold chicken 65 paired with our house masala chai.
+            <span class="rec-tag green">Popular Pairing</span>
+          </div>
+        </div>
+        <div class="rec-item">
+          <div class="rec-icon">🥗</div>
+          <div class="rec-text">
+            <strong>Aloo Cauli + Dal Makhani + Garlic Naan</strong>
+            The vegan &amp; vegetarian dream plate. Rich flavours, totally plant-based.
+            <span class="rec-tag">Vegan Favourite</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sign out -->
+    <div class="signout-row">
+      <button class="signout-btn" onclick="signOut()">Sign out</button>
+    </div>
+
+  </div>
+</div>
+<!-- /profileView -->
+
+<div style="color:rgba(255,228,181,.3);font-size:11px;margin-top:24px;text-align:center;">
+  © Yak N Yeti · 200 Buttercup Creek Blvd, Cedar Park TX ·
+  <a href="tel:+15125141180" style="color:rgba(255,228,181,.35);">(512) 514-1180</a>
+</div>
+
+<script>
+// ════════════════════════════════════════════════
+// CONFIGURATION — owner fills these in once
+// ════════════════════════════════════════════════
+const EMAILJS_SERVICE_ID  = 'YOUR_EMAILJS_SERVICE_ID';
+const EMAILJS_TEMPLATE_ID = 'YOUR_EMAILJS_TEMPLATE_ID';
+const EMAILJS_PUBLIC_KEY  = 'YOUR_EMAILJS_PUBLIC_KEY';
+const GOOGLE_CLIENT_ID_PLACEHOLDER = 'YOUR_GOOGLE_CLIENT_ID_HERE';
+// ════════════════════════════════════════════════
+
+const K_CUST  = 'yn_cust_v3';
+const K_CREDS = 'yn_creds';
+const K_FAVS  = 'yn_favs';
+const K_PROMO = 'yn_site_banner';
+
+// All menu items for favourites
+const ALL_DISHES = [
+  {name:'Samosas',       emoji:'🥟'}, {name:'Sadheko Momo',   emoji:'🥟'},
+  {name:'Steamed Momo',  emoji:'🥟'}, {name:'Jhol Momo',       emoji:'🍜'},
+  {name:'Chicken 65',    emoji:'🍗'}, {name:'Gobi Manchurian', emoji:'🥦'},
+  {name:'Khana Set',     emoji:'🍱'}, {name:'Khaja Set',       emoji:'🍱'},
+  {name:'Tandoori Shrimp',emoji:'🦐'},{name:'Chicken Tikka',   emoji:'🍗'},
+  {name:'Lamb Biryani',  emoji:'🍛'}, {name:'Chicken Biryani', emoji:'🍛'},
+  {name:'Aloo Cauli',    emoji:'🥗'}, {name:'Dal Makhani',     emoji:'🫘'},
+  {name:'Garlic Naan',   emoji:'🫓'}, {name:'Mango Lassi',     emoji:'🥤'},
+  {name:'Lal Mohan',     emoji:'🍮'}, {name:'Masala Chai',     emoji:'☕'},
+];
+
+let otpCode = '';
+let pendingEmail = '';
+let pendingMode  = '';
+
+// ── ON LOAD ──
+window.addEventListener('load', function(){
+  // Restore session
+  const saved = localStorage.getItem(K_CUST);
+  if(saved){ try{ showProfile(JSON.parse(saved)); return; }catch(e){} }
+
+  const googleId = document.querySelector('meta[name="google-signin-client_id"]')?.content;
+  const isGoogle = googleId && googleId !== GOOGLE_CLIENT_ID_PLACEHOLDER;
+  const isEmail  = EMAILJS_PUBLIC_KEY !== 'YOUR_EMAILJS_PUBLIC_KEY';
+
+  if(!isGoogle){
+    document.getElementById('noGoogleNotice').style.display = 'block';
+    ['googleSignInBtn','googleSignInBtn2'].forEach(id => {
+      const el = document.getElementById(id); if(el) el.style.display='none';
+    });
+  } else if(typeof google !== 'undefined'){
+    ['googleSignInBtn','googleSignInBtn2'].forEach(id => {
+      google.accounts.id.initialize({ client_id: googleId, callback: onGoogleSignIn, auto_select:false });
+      google.accounts.id.renderButton(document.getElementById(id),
+        { theme:'outline', size:'large', width:384, text:'signin_with', shape:'rectangular' });
+    });
+    google.accounts.id.prompt();
+  }
+
+  if(!isEmail){
+    document.getElementById('emailNotice').style.display = 'block';
+  } else {
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+  }
+});
+
+// ── TAB SWITCH ──
+function switchTab(t){
+  const m = t==='merch';
+  document.getElementById('custAuth').style.display  = m?'none':'block';
+  document.getElementById('merchAuth').style.display = m?'block':'none';
+  document.getElementById('tabCust').classList.toggle('active',!m);
+  document.getElementById('tabMerch').classList.toggle('active',m);
+}
+
+function switchSubTab(s){
+  const isSignup = s==='signup';
+  document.getElementById('loginPanel').style.display  = isSignup?'none':'block';
+  document.getElementById('signupPanel').style.display = isSignup?'block':'none';
+  const sl = document.getElementById('subLogin');
+  const ss = document.getElementById('subSignup');
+  if(isSignup){
+    ss.style.color='var(--red)'; ss.style.borderBottom='2.5px solid var(--red)'; ss.style.marginBottom='-2px';
+    sl.style.color='var(--muted)'; sl.style.borderBottom='none'; sl.style.marginBottom='0';
+  } else {
+    sl.style.color='var(--red)'; sl.style.borderBottom='2.5px solid var(--red)'; sl.style.marginBottom='-2px';
+    ss.style.color='var(--muted)'; ss.style.borderBottom='none'; ss.style.marginBottom='0';
+  }
+}
+
+// ── GOOGLE SIGN IN ──
+function onGoogleSignIn(response){
+  try{
+    const p = JSON.parse(atob(response.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+    signInSuccess({ name:p.name||'Guest', email:p.email||'', avatar:p.picture||'', verified:true, source:'google' });
+  }catch(e){ alert('Google sign-in failed. Please try again.'); }
+}
+
+// ── EMAIL OTP ──
+function sendOTP(mode){
+  pendingMode = mode;
+  const emailField = mode==='signup'
+    ? document.getElementById('signupEmail')
+    : document.getElementById('loginEmail');
+  const email = emailField.value.trim();
+  if(!email || !email.includes('@')){ alert('Please enter a valid email address.'); return; }
+
+  if(mode==='signup'){
+    const name = document.getElementById('signupName').value.trim();
+    if(!name){ alert('Please enter your name.'); return; }
+  }
+
+  pendingEmail = email;
+  otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+  // Check if EmailJS is configured
+  if(EMAILJS_PUBLIC_KEY === 'YOUR_EMAILJS_PUBLIC_KEY'){
+    // Dev fallback — show code on screen (remove in production)
+    alert('⚙️ EmailJS not set up yet. For testing, your code is: ' + otpCode);
+    showOTPStep(mode);
+    return;
+  }
+
+  emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+    to_email: email, otp: otpCode,
+    restaurant_name: 'Yak N Yeti'
+  }).then(() => {
+    showOTPStep(mode);
+  }).catch(err => {
+    alert('Failed to send code. Please try Google Sign-In or try again.\n' + (err.text||err));
+  });
+}
+
+function showOTPStep(mode){
+  if(mode==='login'){
+    document.getElementById('otpEmailDisplay').textContent = pendingEmail;
+    document.getElementById('otpStep1').classList.remove('active');
+    document.getElementById('otpStep2').classList.add('active');
+  } else {
+    document.getElementById('signupOtpStep').style.display = 'block';
+  }
+}
+
+function resetOTPFlow(){
+  document.getElementById('otpStep1').classList.add('active');
+  document.getElementById('otpStep2').classList.remove('active');
+  document.getElementById('loginEmail').value = '';
+  otpCode = ''; pendingEmail = '';
+}
+
+function verifyOTP(mode){
+  const inputId = mode==='signup' ? 'signupOtpInput' : 'otpInput';
+  const entered = document.getElementById(inputId).value.trim();
+  if(entered !== otpCode){ alert('❌ Incorrect code. Please try again.'); return; }
+
+  if(mode==='signup'){
+    const name  = document.getElementById('signupName').value.trim();
+    const phone = document.getElementById('signupPhone').value.trim();
+    signInSuccess({ name, email:pendingEmail, phone, avatar:'', verified:true, source:'email', isNew:true });
+  } else {
+    // Login — look up existing user or create guest profile
+    const name = pendingEmail.split('@')[0];
+    signInSuccess({ name, email:pendingEmail, avatar:'', verified:true, source:'email' });
+  }
+}
+
+// ── SIGN IN SUCCESS ──
+function signInSuccess(cust){
+  cust.since = cust.since || new Date().toLocaleDateString();
+  localStorage.setItem(K_CUST, JSON.stringify(cust));
+  showProfile(cust);
+}
+
+// ── SHOW PROFILE ──
+function showProfile(cust){
+  document.getElementById('authView').style.display    = 'none';
+  document.getElementById('profileView').style.display = 'block';
+
+  // Load active promo code from banner settings
+  let promoCode = 'WEB10';
+  try{
+    const b = JSON.parse(localStorage.getItem(K_PROMO));
+    if(b && b.active && b.code) promoCode = b.code;
+  }catch(e){}
+
+  document.getElementById('pName').textContent  = cust.name || 'Friend';
+  document.getElementById('pEmail').textContent = cust.email || '';
+  document.getElementById('pPromoCode').textContent = promoCode;
+  document.getElementById('pCopyBtn').textContent = '📋 Copy';
+
+  const av = document.getElementById('pAvatar');
+  const ph = document.getElementById('pAvatarPh');
+  if(cust.avatar){ av.src=cust.avatar; av.style.display='block'; ph.style.display='none'; }
+  else { av.style.display='none'; ph.style.display='flex'; }
+
+  if(cust.verified){ document.getElementById('pVerified').style.display='inline-flex'; }
+
+  renderFavourites();
+}
+
+// ── COPY PROMO ──
+function copyPromo(){
+  const code = document.getElementById('pPromoCode').textContent;
+  navigator.clipboard.writeText(code)
+    .then(()=>{ const b=document.getElementById('pCopyBtn'); b.textContent='✅ Copied!'; setTimeout(()=>b.textContent='📋 Copy',2000); })
+    .catch(()=> prompt('Copy this code:',code));
+}
+
+// ── FAVOURITES ──
+function renderFavourites(){
+  const grid = document.getElementById('favGrid');
+  let favs;
+  try{ favs = JSON.parse(localStorage.getItem(K_FAVS)) || []; }catch(e){ favs=[]; }
+
+  grid.innerHTML = ALL_DISHES.map(d => {
+    const isSaved = favs.includes(d.name);
+    return `<div class="fav-item ${isSaved?'saved':''}" onclick="toggleFav('${d.name}',this)">
+      <div class="fav-emoji">${d.emoji}</div>
+      <div class="fav-name">${d.name}</div>
+      <div class="fav-heart">${isSaved?'❤️':'🤍'}</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleFav(name, el){
+  let favs; try{ favs=JSON.parse(localStorage.getItem(K_FAVS))||[]; }catch(e){ favs=[]; }
+  const idx = favs.indexOf(name);
+  if(idx>=0){ favs.splice(idx,1); el.classList.remove('saved'); el.querySelector('.fav-heart').textContent='🤍'; }
+  else { favs.push(name); el.classList.add('saved'); el.querySelector('.fav-heart').textContent='❤️'; }
+  localStorage.setItem(K_FAVS, JSON.stringify(favs));
+}
+
+// ── SIGN OUT ──
+function signOut(){
+  localStorage.removeItem(K_CUST);
+  try{
+    const googleId = document.querySelector('meta[name="google-signin-client_id"]')?.content;
+    if(googleId && googleId!==GOOGLE_CLIENT_ID_PLACEHOLDER && typeof google!=='undefined'){
+      google.accounts.id.disableAutoSelect();
+    }
+  }catch(e){}
+  document.getElementById('profileView').style.display = 'none';
+  document.getElementById('authView').style.display    = 'block';
+  otpCode=''; pendingEmail='';
+  document.getElementById('otpStep1').classList.add('active');
+  document.getElementById('otpStep2').classList.remove('active');
+}
+
+// ── MERCHANT LOGIN ──
+function merchantLogin(){
+  const u = document.getElementById('mUser').value.trim();
+  const p = document.getElementById('mPass').value;
+  let valid = false;
+  try{ const c=JSON.parse(localStorage.getItem(K_CREDS)); valid=(u===c.u&&p===c.p); }catch(e){}
+  if(!valid) valid = (u==='admin' && p==='yaknyeti2024');
+  if(valid){ window.location.href='admin.html'; }
+  else{
+    const e=document.getElementById('mError'); e.style.display='block';
+    setTimeout(()=>e.style.display='none',3000);
+  }
+}
+</script>
+</body>
+</html>
