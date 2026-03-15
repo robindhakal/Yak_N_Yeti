@@ -195,9 +195,11 @@
     <div class="ob-item" onclick="openDineIn()">
       <div class="ob-icon">🍽️</div><div class="ob-label">Dine In</div><div class="ob-sub">Hours &amp; directions</div>
     </div>
-    <a class="ob-item" href="tel:+15125141180">
-      <div class="ob-icon">📞</div><div class="ob-label">Call Us</div><div class="ob-sub">(512) 514-1180</div>
-    </a>
+  <div class="ob-item" onclick="showCallPopup()">
+  <div class="ob-icon">📞</div>
+  <div class="ob-label">Call Us</div>
+  <div class="ob-sub">(512) 514-1180</div>
+</div>
     <div class="ob-item" onclick="openCatering()">
       <div class="ob-icon">🎉</div><div class="ob-label">Catering</div><div class="ob-sub">Groups &amp; events</div>
     </div>
@@ -613,7 +615,16 @@
   </div>
 </div>
 
-<!-- PANEL MOBILE -->
+<div id="callPopup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:16px;padding:32px;text-align:center;max-width:320px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.3);">
+    <div style="font-size:40px;margin-bottom:12px;">📞</div>
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:6px;">Call Us</h3>
+    <p style="font-size:13px;color:#666;margin-bottom:16px;">Call to reserve a table, ask about catering, or place an order.</p>
+    <a href="tel:+15125141180" style="display:block;background:#C0392B;color:#fff;padding:14px;border-radius:8px;font-size:20px;font-weight:700;text-decoration:none;margin-bottom:10px;">(512) 514-1180</a>
+    <button onclick="closeCallPopup()" style="background:#f5f5f5;border:none;padding:10px 24px;border-radius:8px;font-size:14px;cursor:pointer;">Close</button>
+  </div>
+</div>
+  <!-- PANEL MOBILE -->
 <nav id="panel-mobile">
   <div class="module module-logo bg-white white"><a href="#"><img src="assets/img/logo.svg" alt=""></a><button class="close" data-toggle="panel-mobile"><i class="ti ti-close"></i></button></div>
   <nav class="module module-navigation"></nav>
@@ -731,6 +742,9 @@ function setFilter(type,btn){
     });
   }catch(e){console.log('menu.json not loaded yet');}
 })();
+function showCallPopup(){document.getElementById('callPopup').style.display='flex';document.body.style.overflow='hidden';}
+function closeCallPopup(){document.getElementById('callPopup').style.display='none';document.body.style.overflow='';}
+document.getElementById('callPopup').addEventListener('click',function(e){if(e.target===this)closeCallPopup();});
 </script>
 </body>
 </html>
