@@ -29,10 +29,15 @@
 /* FILTER BAR */
 .filter-bar{background:#fff;border-bottom:1px solid #e0e0e0;padding:10px 20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;}
 .filter-label{font-size:12px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-right:4px;}
-.fbtn{padding:5px 14px;border-radius:20px;font-size:12px;font-weight:700;border:1.5px solid #ddd;background:#f9f9f9;cursor:pointer;color:#555;transition:all .15s;display:inline-flex;align-items:center;gap:5px;}
+.fbtn{padding:5px 14px;border-radius:20px;font-size:12px;font-weight:700;border:1.5px solid #ddd;background:#f9f9f9;cursor:pointer;color:#555;transition:all .2s;display:inline-flex;align-items:center;gap:5px;position:relative;overflow:hidden;}
 .fbtn img{height:15px;width:15px;object-fit:contain;}
-.fbtn:hover{border-color:#C0392B;color:#C0392B;}
-.fbtn.active{background:#C0392B;color:#fff;border-color:#C0392B;}
+.fbtn:hover{border-color:#C0392B;color:#C0392B;transform:translateY(-1px);box-shadow:0 3px 10px rgba(192,57,43,.15);}
+.fbtn.active{background:#C0392B;color:#fff;border-color:#C0392B;transform:translateY(-1px);box-shadow:0 3px 10px rgba(192,57,43,.3);}
+.fbtn.active::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.15);animation:fbtn-flash .35s ease-out;}
+@keyframes fbtn-flash{0%{opacity:1;}100%{opacity:0;}}
+.fbtn.nepal-btn{background:#f5f0ea;border-color:#c8a97e;color:#7a4e2d;}
+.fbtn.nepal-btn:hover{background:#ece3d8;border-color:#C0392B;color:#C0392B;}
+.fbtn.nepal-btn.active{background:#C0392B;color:#fff;border-color:#C0392B;}
 /* PRICE & UNAVAILABLE */
 .yn-price{display:inline-block;background:#C0392B;color:#fff;font-size:13px;font-weight:700;padding:3px 10px;border-radius:4px;margin-top:6px;}
 .yn-unavail{display:inline-block;background:#888;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;margin-left:5px;vertical-align:middle;}
@@ -147,7 +152,7 @@
           </ul>
         </nav>
         <div class="module left">
-          <button type="button" class="btn btn-primary" onclick="window.open('https://www.clover.com/online-ordering/yak-n-yeti-cedar-park')"><span>Order Online</span></button>
+          <button type="button" class="btn btn-primary" onclick="window.open('https://order.online/business/yak-n-yeti-342916')"><span>Order Online</span></button>
         </div>
       </div>
       <div class="col-md-2"></div>
@@ -159,7 +164,7 @@
 <header id="header-mobile" class="light">
   <div class="module module-nav-toggle"><a href="#" id="nav-toggle" data-toggle="panel-mobile"><span></span><span></span><span></span><span></span></a></div>
   <div class="module module-logo"><a href="index.html"><img src="assets/img/logo.svg" alt=""></a></div>
-  <div class="module module-cart"><button type="button" class="btn btn-primary" onclick="window.open('https://www.clover.com/online-ordering/yak-n-yeti-cedar-park')"><span>Order Online</span></button></div>
+  <div class="module module-cart"><button type="button" class="btn btn-primary" onclick="window.open('https://order.online/business/yak-n-yeti-342916')"><span>Order Online</span></button></div>
 </header>
 
 <div id="content">
@@ -186,10 +191,10 @@
 <!-- ORDER OPTIONS BAR -->
 <div class="order-bar">
   <div class="order-bar-inner">
-    <a class="ob-item ob-hl" href="https://www.clover.com/online-ordering/yak-n-yeti-cedar-park" target="_blank">
-      <div class="ob-icon">🛵</div><div class="ob-label">Delivery</div><div class="ob-sub">Order on our website</div>
+    <a class="ob-item ob-hl" href="https://www.doordash.com/store/yak-n-yeti-cedar-park-342916/" target="_blank">
+      <div class="ob-icon">🛵</div><div class="ob-label">Delivery</div><div class="ob-sub">Order via DoorDash</div>
     </a>
-    <a class="ob-item" href="https://www.clover.com/online-ordering/yak-n-yeti-cedar-park" target="_blank">
+    <a class="ob-item" href="https://order.online/business/yak-n-yeti-342916" target="_blank">
       <div class="ob-icon">🥡</div><div class="ob-label">Pickup</div><div class="ob-sub">Ready in 20–25 mins</div>
     </a>
     <div class="ob-item" onclick="openDineIn()">
@@ -210,10 +215,16 @@
 <div class="filter-bar">
   <span class="filter-label">Filter:</span>
   <button class="fbtn active" onclick="setFilter('all',this)">🍽️ All Items</button>
+  <button class="fbtn nepal-btn" onclick="setFilter('nepalese',this)">🏔️ Nepalese Specials</button>
   <button class="fbtn" onclick="setFilter('veg',this)"><img src="assets/img/Vegan.png" alt=""> Vegetarian</button>
   <button class="fbtn" onclick="setFilter('vegan',this)"><img src="assets/img/Vegan.png" alt=""> Vegan</button>
   <button class="fbtn" onclick="setFilter('gf',this)"><img src="assets/img/gluten-free.png" alt=""> Gluten-Free</button>
   <button class="fbtn" onclick="setFilter('spicy',this)"><img src="assets/img/Spicy.png" alt=""> Spicy</button>
+</div>
+
+<!-- SPICE LEVEL BANNER -->
+<div style="background:linear-gradient(135deg,#1C1C1C,#3d0d06);color:#FFE4B5;text-align:center;padding:11px 20px;font-size:13px;font-weight:600;letter-spacing:.3px;">
+  🌶️ <strong>We make every dish to your spice level</strong> — Mild, Medium, Hot, or Extra Hot. Just let us know when ordering!
 </div>
 
 <!-- PAGE CONTENT -->
@@ -446,13 +457,13 @@
     </div>
     <div class="dine-hrs">
       <table>
-        <tr><td>Monday</td><td>11 AM – 2:30 PM &nbsp;&nbsp; 4:30 PM – 8:30 PM</td></tr>
+        <tr><td>Monday</td><td>11:00 AM – 3:00 PM &nbsp;&nbsp; 5:00 PM – 10:00 PM</td></tr>
         <tr><td>Tuesday</td><td style="color:#999;font-style:italic;">Closed</td></tr>
-        <tr><td>Wednesday</td><td>11 AM – 2:30 PM &nbsp;&nbsp; 4:30 PM – 8:30 PM</td></tr>
-        <tr><td>Thursday</td><td>11 AM – 2:30 PM &nbsp;&nbsp; 4:30 PM – 8:30 PM</td></tr>
-        <tr><td>Friday</td><td>11 AM – 2:30 PM &nbsp;&nbsp; 4:30 PM – 8:30 PM</td></tr>
-        <tr><td>Saturday</td><td>11 AM – 2:30 PM &nbsp;&nbsp; 4:30 PM – 8:30 PM</td></tr>
-        <tr><td>Sunday</td><td>11 AM – 2:30 PM &nbsp;&nbsp; 4:30 PM – 8:30 PM</td></tr>
+        <tr><td>Wednesday</td><td>11:00 AM – 3:00 PM &nbsp;&nbsp; 5:00 PM – 10:00 PM</td></tr>
+        <tr><td>Thursday</td><td>11:00 AM – 3:00 PM &nbsp;&nbsp; 5:00 PM – 10:00 PM</td></tr>
+        <tr><td>Friday</td><td>11:00 AM – 3:00 PM &nbsp;&nbsp; 5:00 PM – 10:00 PM</td></tr>
+        <tr><td>Saturday</td><td>11:00 AM – 3:00 PM &nbsp;&nbsp; 5:00 PM – 10:00 PM</td></tr>
+        <tr><td>Sunday</td><td>11:00 AM – 3:00 PM &nbsp;&nbsp; 5:00 PM – 10:00 PM</td></tr>
       </table>
     </div>
     <div>
@@ -484,7 +495,7 @@
     <div>
       <a class="ccta ccta-s" href="tel:+15125141180">📞 Call (512) 514-1180</a>
       <span class="ccta ccta-s" onclick="openCatering()">📋 Request a Quote</span>
-      <a class="ccta ccta-o" href="mailto:contact@yaknyeti.us">✉️ Email Us</a>
+      <a class="ccta ccta-o" href="/cdn-cgi/l/email-protection#05666a6b71646671457c646e6b7c60716c2b7076">✉️ Email Us</a>
     </div>
   </div>
 </div>
@@ -501,19 +512,19 @@
         <hr class="hr-md">
         <div class="row">
           <div class="col-sm-6 mb-3 mb-sm-0"><h6 class="mb-1 text-muted">Phone:</h6><a href="tel:+15125141180">( 512 ) 514-1180</a></div>
-          <div class="col-sm-6"><h6 class="mb-1 text-muted">E-mail:</h6><a href="mailto:contact@yaknyeti.us">contact@yaknyeti.us</a></div>
+          <div class="col-sm-6"><h6 class="mb-1 text-muted">E-mail:</h6><a href="/cdn-cgi/l/email-protection#70131f1e041113043009111b1e091504195e0503"><span class="__cf_email__" data-cfemail="7f1c10110b1e1c0b3f061e1411061a0b16510a0c">[email&#160;protected]</span></a></div>
         </div>
       </div>
       <div class="col-lg-3 col-md-6">
         <h5 class="text-muted">Business Hours</h5>
         <table style="margin-bottom:1.5rem;width:100%;border-spacing:0 6px;border-collapse:separate">
-          <tr><td>Monday</td><td>11 AM - 2:30 PM <br> 4:30 PM - 8:30 PM</td></tr>
+          <tr><td>Monday</td><td>11:00 AM - 3:00 PM <br> 5:00 PM - 10:00 PM</td></tr>
           <tr><td>Tuesday</td><td>Closed</td></tr>
-          <tr><td>Wednesday</td><td>11 AM - 2:30 PM <br> 4:30 PM - 8:30 PM</td></tr>
-          <tr><td>Thursday</td><td>11 AM - 2:30 PM <br> 4:30 PM - 8:30 PM</td></tr>
-          <tr><td>Friday</td><td>11 AM - 2:30 PM <br> 4:30 PM - 8:30 PM</td></tr>
-          <tr><td>Saturday</td><td>11 AM - 2:30 PM <br> 4:30 PM - 8:30 PM</td></tr>
-          <tr><td>Sunday</td><td>11 AM - 2:30 PM <br> 4:30 PM - 8:30 PM</td></tr>
+          <tr><td>Wednesday</td><td>11:00 AM - 3:00 PM <br> 5:00 PM - 10:00 PM</td></tr>
+          <tr><td>Thursday</td><td>11:00 AM - 3:00 PM <br> 5:00 PM - 10:00 PM</td></tr>
+          <tr><td>Friday</td><td>11:00 AM - 3:00 PM <br> 5:00 PM - 10:00 PM</td></tr>
+          <tr><td>Saturday</td><td>11:00 AM - 3:00 PM <br> 5:00 PM - 10:00 PM</td></tr>
+          <tr><td>Sunday</td><td>11:00 AM - 3:00 PM <br> 5:00 PM - 10:00 PM</td></tr>
         </table>
       </div>
       <div class="col-lg-5 col-md-6" id="Subscribe">
@@ -553,13 +564,13 @@
       </div>
       <div class="dn-hours">
         <table>
-          <tr><td>Monday</td><td>11 AM – 2:30 PM &nbsp; 4:30 PM – 8:30 PM</td></tr>
+          <tr><td>Monday</td><td>11:00 AM – 3:00 PM &nbsp; 5:00 PM – 10:00 PM</td></tr>
           <tr><td>Tuesday</td><td style="color:#999;font-style:italic;">Closed</td></tr>
-          <tr><td>Wednesday</td><td>11 AM – 2:30 PM &nbsp; 4:30 PM – 8:30 PM</td></tr>
-          <tr><td>Thursday</td><td>11 AM – 2:30 PM &nbsp; 4:30 PM – 8:30 PM</td></tr>
-          <tr><td>Friday</td><td>11 AM – 2:30 PM &nbsp; 4:30 PM – 8:30 PM</td></tr>
-          <tr><td>Saturday</td><td>11 AM – 2:30 PM &nbsp; 4:30 PM – 8:30 PM</td></tr>
-          <tr><td>Sunday</td><td>11 AM – 2:30 PM &nbsp; 4:30 PM – 8:30 PM</td></tr>
+          <tr><td>Wednesday</td><td>11:00 AM – 3:00 PM &nbsp; 5:00 PM – 10:00 PM</td></tr>
+          <tr><td>Thursday</td><td>11:00 AM – 3:00 PM &nbsp; 5:00 PM – 10:00 PM</td></tr>
+          <tr><td>Friday</td><td>11:00 AM – 3:00 PM &nbsp; 5:00 PM – 10:00 PM</td></tr>
+          <tr><td>Saturday</td><td>11:00 AM – 3:00 PM &nbsp; 5:00 PM – 10:00 PM</td></tr>
+          <tr><td>Sunday</td><td>11:00 AM – 3:00 PM &nbsp; 5:00 PM – 10:00 PM</td></tr>
         </table>
       </div>
       <div class="dn-actions">
@@ -639,7 +650,7 @@
 <div id="body-overlay"></div>
 
 <!-- JS — exact same as original -->
-<script src="assets/plugins/jquery/dist/jquery.min.js"></script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="assets/plugins/jquery/dist/jquery.min.js"></script>
 <script src="assets/plugins/tether/dist/js/tether.min.js"></script>
 <script src="assets/plugins/bootstrap/dist/js/bootstrap.min.js"></script>
 <script src="assets/plugins/slick-carousel/slick/slick.min.js"></script>
@@ -679,6 +690,22 @@ function submitCatering(){
 // DIET FILTER
 var curFilter='all';
 function setFilter(type,btn){
+  // NEPALESE SPECIALS — show only that category
+  if(type==='nepalese'){
+    curFilter=type;
+    document.querySelectorAll('.fbtn').forEach(function(b){b.classList.remove('active');});
+    btn.classList.add('active');
+    document.querySelectorAll('.menu-item').forEach(function(i){i.classList.remove('yn-hidden');});
+    document.querySelectorAll('.menu-category').forEach(function(cat){
+      var isNep = cat.id==='NepaleseHouseSpecials';
+      cat.style.display = isNep ? '' : 'none';
+      if(isNep){ var c=cat.querySelector('.menu-category-content'); if(c) c.classList.add('show'); }
+    });
+    return;
+  }
+  // Restore all categories when switching away
+  document.querySelectorAll('.menu-category').forEach(function(cat){ cat.style.display=''; });
+
   curFilter=type;
   document.querySelectorAll('.fbtn').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
